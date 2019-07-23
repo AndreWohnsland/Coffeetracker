@@ -137,6 +137,10 @@ class Ui_MainWindow(object):
 "    border-top-left-radius: 7px;\n"
 "    border-bottom-left-radius: 0px;\n"
 "    color: rgb(239, 151, 0);\n"
+"}\n"
+"\n"
+"#L_money {\n"
+"    color: rgb(239, 151, 0);\n"
 "}")
         self.centralwidget = QtWidgets.QWidget(MainWindow)
         self.centralwidget.setObjectName("centralwidget")
@@ -155,18 +159,21 @@ class Ui_MainWindow(object):
         self.horizontalLayout = QtWidgets.QHBoxLayout()
         self.horizontalLayout.setObjectName("horizontalLayout")
         self.CB_employee = QtWidgets.QComboBox(self.centralwidget)
-        self.CB_employee.setMinimumSize(QtCore.QSize(300, 70))
+        self.CB_employee.setMinimumSize(QtCore.QSize(105, 70))
+        font = QtGui.QFont()
+        font.setPointSize(16)
+        self.CB_employee.setFont(font)
         self.CB_employee.setObjectName("CB_employee")
         self.horizontalLayout.addWidget(self.CB_employee)
-        self.label_2 = QtWidgets.QLabel(self.centralwidget)
+        self.L_money = QtWidgets.QLabel(self.centralwidget)
         font = QtGui.QFont()
         font.setPointSize(24)
         font.setBold(True)
         font.setWeight(75)
-        self.label_2.setFont(font)
-        self.label_2.setAlignment(QtCore.Qt.AlignCenter)
-        self.label_2.setObjectName("label_2")
-        self.horizontalLayout.addWidget(self.label_2)
+        self.L_money.setFont(font)
+        self.L_money.setAlignment(QtCore.Qt.AlignCenter)
+        self.L_money.setObjectName("L_money")
+        self.horizontalLayout.addWidget(self.L_money)
         self.verticalLayout.addLayout(self.horizontalLayout)
         self.PB_add_quant = QtWidgets.QPushButton(self.centralwidget)
         self.PB_add_quant.setMinimumSize(QtCore.QSize(0, 70))
@@ -207,7 +214,7 @@ class Ui_MainWindow(object):
         _translate = QtCore.QCoreApplication.translate
         MainWindow.setWindowTitle(_translate("MainWindow", "Cofeetracker"))
         self.label.setText(_translate("MainWindow", "Select name / choose option"))
-        self.label_2.setText(_translate("MainWindow", "<html><head/><body><p><span style=\" color:#ef9700;\">Anzahl</span></p></body></html>"))
+        self.L_money.setText(_translate("MainWindow", "<html><head/><body><p><span style=\" color:#ef9700;\">Credit</span></p></body></html>"))
         self.PB_add_quant.setText(_translate("MainWindow", "Add one coffe to employee"))
         self.PB_pay.setText(_translate("MainWindow", "Pay my debts"))
         self.PB_options.setText(_translate("MainWindow", "Options"))

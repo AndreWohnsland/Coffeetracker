@@ -150,6 +150,10 @@ QComboBox:on { /* shift the text when the popup opens */
     border-top-left-radius: 7px;
     border-bottom-left-radius: 0px;
 	color: rgb(239, 151, 0);
+}
+
+#L_money {
+	color: rgb(239, 151, 0);
 }</string>
   </property>
   <widget class="QWidget" name="centralwidget">
@@ -183,14 +187,20 @@ QComboBox:on { /* shift the text when the popup opens */
        <widget class="QComboBox" name="CB_employee">
         <property name="minimumSize">
          <size>
-          <width>300</width>
+          <width>105</width>
           <height>70</height>
          </size>
         </property>
        </widget>
       </item>
       <item>
-       <widget class="QLabel" name="label_2">
+       <widget class="QLabel" name="L_money">
+        <property name="maximumSize">
+         <size>
+          <width>180</width>
+          <height>16777215</height>
+         </size>
+        </property>
         <property name="font">
          <font>
           <pointsize>24</pointsize>
@@ -199,7 +209,7 @@ QComboBox:on { /* shift the text when the popup opens */
          </font>
         </property>
         <property name="text">
-         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; color:#ef9700;&quot;&gt;Anzahl&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; color:#ef9700;&quot;&gt;Credit&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
         </property>
         <property name="alignment">
          <set>Qt::AlignCenter</set>

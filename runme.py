@@ -16,5 +16,5 @@ db_path = os.path.join(dirpath, subfoldername, "{}.db".format(db_name))
 print(db_path)
 
 if __name__ == "__main__":
-    create_new_db(db_path)
+    # create_new_db(db_path)
     create_main_window(devenvironment, db_path, app_width=app_width, app_height=app_height)
