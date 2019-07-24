@@ -1,0 +1,160 @@
+import sys
+import sqlite3
+import datetime
+
+from PyQt5.QtCore import *
+from PyQt5.QtGui import *
+from PyQt5.QtGui import QIntValidator
+from PyQt5.QtWidgets import *
+from PyQt5.uic import *
+
+from ui_elements.mainwindow import Ui_MainWindow
+from src.msgboxgenerate import standartbox
+from src.setup_optiondialog import OptionDialog
+from src.setup_paydialog import PayDialog
+
+class MainScreen(QMainWindow, Ui_MainWindow):
+    """ Creates the mainwindow where the user will be on startup.
+
+        Attributes for Init:
+            devenvironment (Bool): For development purposes, deactivates imports and commands 
+                which are specific to the Raspberry Pi or the use of a touchscreen.
+            DB (path): Path to the Database, or where the DB will be stored.
+    """
+
+    def __init__(self, devenvironment, db_path=None, parent=None):
+        """ Init function for the MainWindow Class. """
+        super(MainScreen, self).__init__(parent)
+        self.setupUi(self)
+        # as long as its not devenvironment (usually touchscreen) hide the cursor
+        self.devenvironment = devenvironment
+        if not self.devenvironment:
+            self.setCursor(Qt.BlankCursor)
+        # connect to the DB, if one is given (you should always give one!)
+        if db_path is not None:
+            self.DB = sqlite3.connect(db_path)
+            self.c = self.DB.cursor()
+        # connects the buttons with the according functions
+        self.PB_add_quant.clicked.connect(self.add_quant_clicked)
+        self.PB_options.clicked.connect(self.options_clicked)
+        self.PB_pay.clicked.connect(self.pay_clicked)
+        self.CB_employee.activated.connect(self.combobox_change)
+        # loads all the active names into the DB
+        sqlstring = "SELECT first_name, last_name from employees WHERE enabled = 1"
+        self.CB_employee.addItem("")
+        for employee in self.c.execute(sqlstring):
+            self.CB_employee.addItem(" ".join((employee[0], employee[1])))
+        # Generates the ID, the Name and the first/last name
+        self.employee_name = ""
+        self.employee_first_name = ""
+        self.employee_last_name = ""
+        self.employee_id = 0
+
+    def add_quant_clicked(self):
+        """ Adds one quantity to the employee. """
+        # if there is an employee selected, gets the first and the last name and search into the db, insert the values
+        enter_quant = False
+        if self.employee_name == "":
+            # if the user didnt select a name it will fail.
+            standartbox("Please select a name!")
+        else:
+            user_return = standartbox("Enter a coffee to user", boxtype="okcancel", okstring="Yes", cancelstring="No")
+            # if the user return is ok (value 1024 in qt) then set the variable to carry on
+            if user_return == 1024:
+                enter_quant = True
+        if enter_quant:
+            # split the cb (since it displays first and lastname as onne)
+            exist_employee = self.c.execute("SELECT COUNT(*) FROM employees WHERE first_name = ? and last_name = ?", (self.employee_first_name, self.employee_last_name)).fetchone()[0]
+            if exist_employee:
+                # also gets the time to insert into the tracking table, the costs are currently here as dummy, later a better solution needs to established
+                dummy_costs = 0.25
+                time_now = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+                self.c.execute("UPDATE OR IGNORE employees SET amount = amount + 1, money = money - ? WHERE ID = ?", (dummy_costs, self.employee_id))
+                self.c.execute("INSERT OR IGNORE INTO tracks(employee_ID, time) VALUES(?, ?)", (self.employee_id, time_now))
+                self.DB.commit()
+                self.combobox_change()
+            else:
+                # this should never happen
+                standartbox("Ough! Somehow the employee doesn't exist in the Database!")
+
+    def pay_clicked(self):
+        """ Gives the user the ability to pay his debts. """
+        # checks if the employee name is given
+        if self.employee_name == "":
+            standartbox("No name selected!")
+        # select the id and in case of a critical error informs the user
+        else:
+            # This should also never happen since we will have a id with a selected employee
+            if self.employee_id is None or not self.employee_id:
+                standartbox("Sorry, something went wrong!")
+            else:
+                # opens the paydialog window and passes id as well as name to it.
+                self.paydialog = PayDialog(self)
+                self.paydialog.showFullScreen()
+    
+    def options_clicked(self):
+        """ Opens up the option dialog to chose different options and enter new users. """
+        self.optiondialog = OptionDialog(self)
+        self.optiondialog.showFullScreen()
+
+    def combobox_change(self):
+        """ Code gets called each time when the combobox is changed by a user or to refresh the money/debts. """
+        # gets the new name of the employee
+        employee_name = self.CB_employee.currentText()
+        # only executes the code when the combobox is not empty
+        if employee_name != "":
+            first_name, last_name = employee_name.split()
+            money, employee_id = self.c.execute("SELECT money, ID FROM employees WHERE first_name = ? and last_name = ?", (first_name, last_name)).fetchone()[0:2]
+            # sets the label according to the credit
+            self.update_money_shown(money)
+            # updates the attributes of our class object (employee properties)
+            self.employee_first_name = first_name
+            self.employee_last_name = last_name
+            self.employee_name = employee_name
+            self.employee_id = employee_id
+        else:
+            self.L_money.setText("")
+            # updates the attributes of our class object (employee properties)
+            self.employee_first_name = ""
+            self.employee_last_name = ""
+            self.employee_name = ""
+            self.employee_id = 0
+
+    def lineedit_clicked(self, le_to_write):
+        """ Calls a keyboard to write text into a line edit.
+        The mainwindow only got this method and inherits it to its children.
+        """
+        pass
+
+    def update_money_shown(self, money):
+        """ Updates the label in the mainscreen which shows the money. """
+        # sets the label according to the credit
+        prefix = ""
+        if money < 0:
+            prefix = "-"
+        elif money > 0:
+            prefix = "+"
+        self.L_money.setText("{} {:.2f} €".format(prefix, abs(money)))
+
+    def lineedit_changed_number(self, le_object, max_decimals=2, max_text_length=2):
+        """ Method to limit the lineedits entry to a set length/decimals"""
+        le_text = le_object.text()
+        # only works on numbers not some chars
+        if le_text != "":
+            try:
+                le_value = float(le_text)
+                # if the number is a int, it will stay an int
+                if int(float(le_text)) == float(le_text):
+                    le_value = int(le_text)
+                # otherwise round it down to the given digits
+                else:
+                    le_value = int(le_value * 10**max_decimals)/10**max_decimals
+                # if the value is too long ignore last entry
+                if int(float(le_text)) >= 10**max_text_length:
+                    le_value = le_text[:-1]
+            except ValueError:
+                le_value = le_text[:-1]
+            # the algorythm kills the dots so if the last digit is a dot just use the text and exclude more than one dot
+            if le_text[-1] == "." and le_text.count(".")<2:
+                le_value = le_text
+            le_object.setText(str(le_value))
