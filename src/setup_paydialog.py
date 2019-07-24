@@ -53,6 +53,7 @@ class PayDialog(QDialog, Ui_PayDialog):
             self.ms.c.execute("UPDATE OR IGNORE employees SET money = money + ? WHERE ID = ?",(pay_amount, self.employee_id))
             new_money = self.ms.c.execute("SELECT money FROM employees WHERE ID = ?",(self.employee_id,)).fetchone()[0]
             self.ms.DB.commit()
+            self.LE_credit.setText("")
             standartbox("Your payment has been entered!")
             self.ms.update_money_shown(new_money)
     
