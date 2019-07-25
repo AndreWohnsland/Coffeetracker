@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>OptionDialog</class>
- <widget class="QDialog" name="OptionDialog">
+ <class>MasterDialog</class>
+ <widget class="QDialog" name="MasterDialog">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -154,11 +154,8 @@ QLineEdit
     border-radius: 5;
 }
 
-#LE_last_name {
-	color: rgb(239, 151, 0);
-}
 
-#LE_first_name {
+#CHB_active {
 	color: rgb(239, 151, 0);
 }</string>
   </property>
@@ -171,6 +168,12 @@ QLineEdit
         <size>
          <width>0</width>
          <height>70</height>
+        </size>
+       </property>
+       <property name="maximumSize">
+        <size>
+         <width>150</width>
+         <height>16777215</height>
         </size>
        </property>
        <property name="font">
@@ -186,22 +189,20 @@ QLineEdit
       </widget>
      </item>
      <item>
-      <widget class="QPushButton" name="PB_leaderboard">
+      <widget class="QComboBox" name="CB_employee">
        <property name="minimumSize">
         <size>
-         <width>0</width>
+         <width>105</width>
          <height>70</height>
         </size>
        </property>
        <property name="font">
         <font>
-         <pointsize>20</pointsize>
-         <weight>75</weight>
-         <bold>true</bold>
+         <pointsize>18</pointsize>
         </font>
        </property>
-       <property name="text">
-        <string>Leaderboard</string>
+       <property name="maxVisibleItems">
+        <number>6</number>
        </property>
       </widget>
      </item>
@@ -298,10 +299,10 @@ QLineEdit
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout_3">
      <item>
-      <widget class="QPushButton" name="PB_add_employee">
+      <widget class="QPushButton" name="PB_change">
        <property name="minimumSize">
         <size>
-         <width>0</width>
+         <width>200</width>
          <height>70</height>
         </size>
        </property>
@@ -313,27 +314,45 @@ QLineEdit
         </font>
        </property>
        <property name="text">
-        <string>Add new</string>
+        <string>change</string>
        </property>
       </widget>
      </item>
      <item>
-      <widget class="QPushButton" name="PB_master">
+      <spacer name="horizontalSpacer">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+     <item>
+      <widget class="QCheckBox" name="CHB_active">
        <property name="minimumSize">
         <size>
-         <width>0</width>
-         <height>70</height>
+         <width>200</width>
+         <height>0</height>
         </size>
        </property>
        <property name="font">
         <font>
          <pointsize>20</pointsize>
-         <weight>75</weight>
-         <bold>true</bold>
         </font>
        </property>
+       <property name="styleSheet">
+        <string notr="true">QCheckBox::indicator 
+{
+	width: 30px;
+	height: 30px;
+}</string>
+       </property>
        <property name="text">
-        <string>Master</string>
+        <string>  active</string>
        </property>
       </widget>
      </item>

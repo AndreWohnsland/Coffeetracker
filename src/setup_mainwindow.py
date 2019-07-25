@@ -40,10 +40,7 @@ class MainScreen(QMainWindow, Ui_MainWindow):
         self.PB_pay.clicked.connect(self.pay_clicked)
         self.CB_employee.activated.connect(self.combobox_change)
         # loads all the active names into the DB
-        sqlstring = "SELECT first_name, last_name from employees WHERE enabled = 1"
-        self.CB_employee.addItem("")
-        for employee in self.c.execute(sqlstring):
-            self.CB_employee.addItem(" ".join((employee[0], employee[1])))
+        self.fillenabled_combobox()
         # Generates the ID, the Name and the first/last name
         self.employee_name = ""
         self.employee_first_name = ""
@@ -120,11 +117,15 @@ class MainScreen(QMainWindow, Ui_MainWindow):
             self.employee_name = ""
             self.employee_id = 0
 
-    def lineedit_clicked(self, le_to_write):
+    def lineedit_clicked(self, le_to_write, inputtype="kb"):
         """ Calls a keyboard to write text into a line edit.
+        Alternatively you can call a numpdad
         The mainwindow only got this method and inherits it to its children.
         """
-        pass
+        if inputtype == "kb":
+            print("Keyboard")
+        elif inputtype == "np":
+            print("numpad")
 
     def update_money_shown(self, money):
         """ Updates the label in the mainscreen which shows the money. """
@@ -158,3 +159,49 @@ class MainScreen(QMainWindow, Ui_MainWindow):
             if le_text[-1] == "." and le_text.count(".")<2:
                 le_value = le_text
             le_object.setText(str(le_value))
+
+    def fillenabled_combobox(self):
+        """ Fills all enabled employees into the CB. """
+        sqlstring = "SELECT first_name, last_name from employees WHERE enabled = 1 ORDER BY last_name ASC"
+        self.CB_employee.addItem("")
+        for employee in self.c.execute(sqlstring):
+            self.CB_employee.addItem(" ".join((employee[0], employee[1])))
+
+
+    def add_employee_clicked(self, first_name_object, last_name_object, update=False, id=None, checkbox_object=None):
+        """ Adds the employee to the DB if not already exisiting and all Names are given and at least 3 chars. 
+        Also got the possibility to change the the selected eployedd instead.
+        """
+        # replace all the spaces (we want only one first and one last name!)
+        first_name = first_name_object.text().replace(" ","").capitalize() 
+        last_name  = last_name_object.text().replace(" ","").capitalize() 
+        # checks if any is empty or less than thress
+        if first_name == "" or last_name == "":
+            standartbox("At least one of the names is missing!")
+        elif len(first_name)<3 or len(last_name)<3:
+            standartbox("The names need at least three character!")
+        else:
+            # checks if already exists, else enter into the DB
+            name_exists = self.c.execute("SELECT COUNT(*) FROM employees WHERE first_name = ? AND last_name = ?",(first_name, last_name)).fetchone()[0]
+            if not name_exists and not update:
+                self.c.execute("INSERT OR IGNORE INTO employees(first_name, last_name, amount, money, enabled) VALUES(?,?,0,0,1)",(first_name, last_name))
+                self.DB.commit()
+                first_name_object.clear()
+                last_name_object.clear()
+                standartbox("Employee {} {} was generated!".format(first_name, last_name))
+                self.CB_employee.addItem(" ".join((first_name, last_name)))
+                self.CB_employee.model().sort(0)
+            elif update:
+                if checkbox_object.isChecked():
+                    enabled = 1
+                else:
+                    enabled = 0
+                self.c.execute("UPDATE OR IGNORE employees SET first_name=?, last_name=?, enabled=? WHERE ID=?",(first_name, last_name, enabled, id))
+                self.DB.commit()
+                self.CB_employee.clear()
+                self.fillenabled_combobox()
+                standartbox("Employee {} {} was updated!".format(first_name, last_name))
+                return True
+            else:
+                standartbox("This employee already exists!")
+        return False

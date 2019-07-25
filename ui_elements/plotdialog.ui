@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>OptionDialog</class>
- <widget class="QDialog" name="OptionDialog">
+ <class>PlotDialog</class>
+ <widget class="QDialog" name="PlotDialog">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -154,11 +154,7 @@ QLineEdit
     border-radius: 5;
 }
 
-#LE_last_name {
-	color: rgb(239, 151, 0);
-}
-
-#LE_first_name {
+#L_text {
 	color: rgb(239, 151, 0);
 }</string>
   </property>
@@ -186,7 +182,7 @@ QLineEdit
       </widget>
      </item>
      <item>
-      <widget class="QPushButton" name="PB_leaderboard">
+      <widget class="QPushButton" name="PB_dummy">
        <property name="minimumSize">
         <size>
          <width>0</width>
@@ -201,104 +197,31 @@ QLineEdit
         </font>
        </property>
        <property name="text">
-        <string>Leaderboard</string>
+        <string>dummy</string>
        </property>
       </widget>
      </item>
     </layout>
    </item>
    <item>
-    <layout class="QHBoxLayout" name="horizontalLayout_2">
-     <item>
-      <layout class="QVBoxLayout" name="verticalLayout">
-       <item>
-        <widget class="QLabel" name="label">
-         <property name="maximumSize">
-          <size>
-           <width>16777215</width>
-           <height>35</height>
-          </size>
-         </property>
-         <property name="font">
-          <font>
-           <pointsize>22</pointsize>
-           <weight>75</weight>
-           <bold>true</bold>
-          </font>
-         </property>
-         <property name="text">
-          <string>First Name</string>
-         </property>
-         <property name="alignment">
-          <set>Qt::AlignCenter</set>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="ClickableLineEdit" name="LE_first_name">
-         <property name="minimumSize">
-          <size>
-           <width>0</width>
-           <height>70</height>
-          </size>
-         </property>
-         <property name="font">
-          <font>
-           <pointsize>20</pointsize>
-          </font>
-         </property>
-        </widget>
-       </item>
-      </layout>
-     </item>
-     <item>
-      <layout class="QVBoxLayout" name="verticalLayout_2">
-       <item>
-        <widget class="QLabel" name="label_2">
-         <property name="maximumSize">
-          <size>
-           <width>16777215</width>
-           <height>35</height>
-          </size>
-         </property>
-         <property name="font">
-          <font>
-           <pointsize>22</pointsize>
-           <weight>75</weight>
-           <bold>true</bold>
-          </font>
-         </property>
-         <property name="text">
-          <string>Last Name</string>
-         </property>
-         <property name="alignment">
-          <set>Qt::AlignCenter</set>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="ClickableLineEdit" name="LE_last_name">
-         <property name="minimumSize">
-          <size>
-           <width>0</width>
-           <height>70</height>
-          </size>
-         </property>
-         <property name="font">
-          <font>
-           <pointsize>20</pointsize>
-          </font>
-         </property>
-        </widget>
-       </item>
-      </layout>
-     </item>
-    </layout>
+    <widget class="QLabel" name="L_text">
+     <property name="font">
+      <font>
+       <pointsize>20</pointsize>
+      </font>
+     </property>
+     <property name="text">
+      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:20pt;&quot;&gt;You can choose betwenn lifetime &lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-size:20pt;&quot;&gt;or only active employees&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignCenter</set>
+     </property>
+    </widget>
    </item>
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout_3">
      <item>
-      <widget class="QPushButton" name="PB_add_employee">
+      <widget class="QPushButton" name="PB_plot_active">
        <property name="minimumSize">
         <size>
          <width>0</width>
@@ -313,12 +236,12 @@ QLineEdit
         </font>
        </property>
        <property name="text">
-        <string>Add new</string>
+        <string>plot active</string>
        </property>
       </widget>
      </item>
      <item>
-      <widget class="QPushButton" name="PB_master">
+      <widget class="QPushButton" name="PB_plot_all">
        <property name="minimumSize">
         <size>
          <width>0</width>
@@ -333,7 +256,7 @@ QLineEdit
         </font>
        </property>
        <property name="text">
-        <string>Master</string>
+        <string>plot all</string>
        </property>
       </widget>
      </item>
@@ -341,13 +264,6 @@ QLineEdit
    </item>
   </layout>
  </widget>
- <customwidgets>
-  <customwidget>
-   <class>ClickableLineEdit</class>
-   <extends>QLineEdit</extends>
-   <header>clickablelineedit.h</header>
-  </customwidget>
- </customwidgets>
  <resources/>
  <connections/>
 </ui>

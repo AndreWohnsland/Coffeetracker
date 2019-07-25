@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'optiondialog.ui'
+# Form implementation generated from reading ui file 'plotdialog.ui'
 #
 # Created by: PyQt5 UI code generator 5.10
 #
@@ -8,13 +8,13 @@
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 
-class Ui_OptionDialog(object):
-    def setupUi(self, OptionDialog):
-        OptionDialog.setObjectName("OptionDialog")
-        OptionDialog.resize(480, 320)
-        OptionDialog.setMinimumSize(QtCore.QSize(480, 320))
-        OptionDialog.setMaximumSize(QtCore.QSize(480, 320))
-        OptionDialog.setStyleSheet("QWidget\n"
+class Ui_PlotDialog(object):
+    def setupUi(self, PlotDialog):
+        PlotDialog.setObjectName("PlotDialog")
+        PlotDialog.resize(480, 320)
+        PlotDialog.setMinimumSize(QtCore.QSize(480, 320))
+        PlotDialog.setMaximumSize(QtCore.QSize(480, 320))
+        PlotDialog.setStyleSheet("QWidget\n"
 "{\n"
 "    color: rgb(0, 123, 255);    \n"
 "    background-color: rgb(0, 0, 0);\n"
@@ -142,18 +142,14 @@ class Ui_OptionDialog(object):
 "    border-radius: 5;\n"
 "}\n"
 "\n"
-"#LE_last_name {\n"
-"    color: rgb(239, 151, 0);\n"
-"}\n"
-"\n"
-"#LE_first_name {\n"
+"#L_text {\n"
 "    color: rgb(239, 151, 0);\n"
 "}")
-        self.verticalLayout_3 = QtWidgets.QVBoxLayout(OptionDialog)
+        self.verticalLayout_3 = QtWidgets.QVBoxLayout(PlotDialog)
         self.verticalLayout_3.setObjectName("verticalLayout_3")
         self.horizontalLayout = QtWidgets.QHBoxLayout()
         self.horizontalLayout.setObjectName("horizontalLayout")
-        self.PB_back = QtWidgets.QPushButton(OptionDialog)
+        self.PB_back = QtWidgets.QPushButton(PlotDialog)
         self.PB_back.setMinimumSize(QtCore.QSize(0, 70))
         font = QtGui.QFont()
         font.setPointSize(20)
@@ -162,102 +158,64 @@ class Ui_OptionDialog(object):
         self.PB_back.setFont(font)
         self.PB_back.setObjectName("PB_back")
         self.horizontalLayout.addWidget(self.PB_back)
-        self.PB_leaderboard = QtWidgets.QPushButton(OptionDialog)
-        self.PB_leaderboard.setMinimumSize(QtCore.QSize(0, 70))
+        self.PB_dummy = QtWidgets.QPushButton(PlotDialog)
+        self.PB_dummy.setMinimumSize(QtCore.QSize(0, 70))
         font = QtGui.QFont()
         font.setPointSize(20)
         font.setBold(True)
         font.setWeight(75)
-        self.PB_leaderboard.setFont(font)
-        self.PB_leaderboard.setObjectName("PB_leaderboard")
-        self.horizontalLayout.addWidget(self.PB_leaderboard)
+        self.PB_dummy.setFont(font)
+        self.PB_dummy.setObjectName("PB_dummy")
+        self.horizontalLayout.addWidget(self.PB_dummy)
         self.verticalLayout_3.addLayout(self.horizontalLayout)
-        self.horizontalLayout_2 = QtWidgets.QHBoxLayout()
-        self.horizontalLayout_2.setObjectName("horizontalLayout_2")
-        self.verticalLayout = QtWidgets.QVBoxLayout()
-        self.verticalLayout.setObjectName("verticalLayout")
-        self.label = QtWidgets.QLabel(OptionDialog)
-        self.label.setMaximumSize(QtCore.QSize(16777215, 35))
-        font = QtGui.QFont()
-        font.setPointSize(22)
-        font.setBold(True)
-        font.setWeight(75)
-        self.label.setFont(font)
-        self.label.setAlignment(QtCore.Qt.AlignCenter)
-        self.label.setObjectName("label")
-        self.verticalLayout.addWidget(self.label)
-        self.LE_first_name = ClickableLineEdit(OptionDialog)
-        self.LE_first_name.setMinimumSize(QtCore.QSize(0, 70))
+        self.L_text = QtWidgets.QLabel(PlotDialog)
         font = QtGui.QFont()
         font.setPointSize(20)
-        self.LE_first_name.setFont(font)
-        self.LE_first_name.setObjectName("LE_first_name")
-        self.verticalLayout.addWidget(self.LE_first_name)
-        self.horizontalLayout_2.addLayout(self.verticalLayout)
-        self.verticalLayout_2 = QtWidgets.QVBoxLayout()
-        self.verticalLayout_2.setObjectName("verticalLayout_2")
-        self.label_2 = QtWidgets.QLabel(OptionDialog)
-        self.label_2.setMaximumSize(QtCore.QSize(16777215, 35))
-        font = QtGui.QFont()
-        font.setPointSize(22)
-        font.setBold(True)
-        font.setWeight(75)
-        self.label_2.setFont(font)
-        self.label_2.setAlignment(QtCore.Qt.AlignCenter)
-        self.label_2.setObjectName("label_2")
-        self.verticalLayout_2.addWidget(self.label_2)
-        self.LE_last_name = ClickableLineEdit(OptionDialog)
-        self.LE_last_name.setMinimumSize(QtCore.QSize(0, 70))
-        font = QtGui.QFont()
-        font.setPointSize(20)
-        self.LE_last_name.setFont(font)
-        self.LE_last_name.setObjectName("LE_last_name")
-        self.verticalLayout_2.addWidget(self.LE_last_name)
-        self.horizontalLayout_2.addLayout(self.verticalLayout_2)
-        self.verticalLayout_3.addLayout(self.horizontalLayout_2)
+        self.L_text.setFont(font)
+        self.L_text.setAlignment(QtCore.Qt.AlignCenter)
+        self.L_text.setObjectName("L_text")
+        self.verticalLayout_3.addWidget(self.L_text)
         self.horizontalLayout_3 = QtWidgets.QHBoxLayout()
         self.horizontalLayout_3.setObjectName("horizontalLayout_3")
-        self.PB_add_employee = QtWidgets.QPushButton(OptionDialog)
-        self.PB_add_employee.setMinimumSize(QtCore.QSize(0, 70))
+        self.PB_plot_active = QtWidgets.QPushButton(PlotDialog)
+        self.PB_plot_active.setMinimumSize(QtCore.QSize(0, 70))
         font = QtGui.QFont()
         font.setPointSize(20)
         font.setBold(True)
         font.setWeight(75)
-        self.PB_add_employee.setFont(font)
-        self.PB_add_employee.setObjectName("PB_add_employee")
-        self.horizontalLayout_3.addWidget(self.PB_add_employee)
-        self.PB_master = QtWidgets.QPushButton(OptionDialog)
-        self.PB_master.setMinimumSize(QtCore.QSize(0, 70))
+        self.PB_plot_active.setFont(font)
+        self.PB_plot_active.setObjectName("PB_plot_active")
+        self.horizontalLayout_3.addWidget(self.PB_plot_active)
+        self.PB_plot_all = QtWidgets.QPushButton(PlotDialog)
+        self.PB_plot_all.setMinimumSize(QtCore.QSize(0, 70))
         font = QtGui.QFont()
         font.setPointSize(20)
         font.setBold(True)
         font.setWeight(75)
-        self.PB_master.setFont(font)
-        self.PB_master.setObjectName("PB_master")
-        self.horizontalLayout_3.addWidget(self.PB_master)
+        self.PB_plot_all.setFont(font)
+        self.PB_plot_all.setObjectName("PB_plot_all")
+        self.horizontalLayout_3.addWidget(self.PB_plot_all)
         self.verticalLayout_3.addLayout(self.horizontalLayout_3)
 
-        self.retranslateUi(OptionDialog)
-        QtCore.QMetaObject.connectSlotsByName(OptionDialog)
+        self.retranslateUi(PlotDialog)
+        QtCore.QMetaObject.connectSlotsByName(PlotDialog)
 
-    def retranslateUi(self, OptionDialog):
+    def retranslateUi(self, PlotDialog):
         _translate = QtCore.QCoreApplication.translate
-        OptionDialog.setWindowTitle(_translate("OptionDialog", "Dialog"))
-        self.PB_back.setText(_translate("OptionDialog", "< Back"))
-        self.PB_leaderboard.setText(_translate("OptionDialog", "Leaderboard"))
-        self.label.setText(_translate("OptionDialog", "First Name"))
-        self.label_2.setText(_translate("OptionDialog", "Last Name"))
-        self.PB_add_employee.setText(_translate("OptionDialog", "Add new"))
-        self.PB_master.setText(_translate("OptionDialog", "Master"))
+        PlotDialog.setWindowTitle(_translate("PlotDialog", "Dialog"))
+        self.PB_back.setText(_translate("PlotDialog", "< Back"))
+        self.PB_dummy.setText(_translate("PlotDialog", "dummy"))
+        self.L_text.setText(_translate("PlotDialog", "<html><head/><body><p><span style=\" font-size:20pt;\">You can choose betwenn lifetime </span></p><p><span style=\" font-size:20pt;\">or only active employees</span></p></body></html>"))
+        self.PB_plot_active.setText(_translate("PlotDialog", "plot active"))
+        self.PB_plot_all.setText(_translate("PlotDialog", "plot all"))
 
-from clickablelineedit import ClickableLineEdit
 
 if __name__ == "__main__":
     import sys
     app = QtWidgets.QApplication(sys.argv)
-    OptionDialog = QtWidgets.QDialog()
-    ui = Ui_OptionDialog()
-    ui.setupUi(OptionDialog)
-    OptionDialog.show()
+    PlotDialog = QtWidgets.QDialog()
+    ui = Ui_PlotDialog()
+    ui.setupUi(PlotDialog)
+    PlotDialog.show()
     sys.exit(app.exec_())
 
