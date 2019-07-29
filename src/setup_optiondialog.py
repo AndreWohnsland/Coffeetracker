@@ -31,10 +31,6 @@ class OptionDialog(QDialog, Ui_OptionDialog):
         self.LE_first_name.clicked.connect(lambda: self.ms.lineedit_clicked(self.LE_first_name))
         self.LE_last_name.clicked.connect(lambda: self.ms.lineedit_clicked(self.LE_last_name))
 
-    def back_clicked(self):
-        """ Close the window without any further action. """
-        self.close()
-
     def leaderboard_clicked(self):
         """ Plots a graph of the all time leaderboard (or maybe select between active and non active). """
         self.ms.plotdialog = PlotDialog(self.ms)
@@ -44,3 +40,7 @@ class OptionDialog(QDialog, Ui_OptionDialog):
         """ Opens up the master dialog. """
         self.ms.masterdialog = MasterDialog(self.ms)
         self.ms.masterdialog.showFullScreen()
+
+    def back_clicked(self):
+        """ Close the window without any further action. """
+        self.close()

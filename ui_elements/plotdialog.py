@@ -141,7 +141,7 @@ class Ui_PlotDialog(object):
 "    border: 1px solid rgb(97, 97, 97);\n"
 "    border-radius: 5;\n"
 "}\n"
-"\n"
+"/*\n"
 "#L_text {\n"
 "    color: rgb(239, 151, 0);\n"
 "}")
@@ -205,7 +205,7 @@ class Ui_PlotDialog(object):
         PlotDialog.setWindowTitle(_translate("PlotDialog", "Dialog"))
         self.PB_back.setText(_translate("PlotDialog", "< Back"))
         self.PB_dummy.setText(_translate("PlotDialog", "dummy"))
-        self.L_text.setText(_translate("PlotDialog", "<html><head/><body><p><span style=\" font-size:20pt;\">You can choose betwenn lifetime </span></p><p><span style=\" font-size:20pt;\">or only active employees</span></p></body></html>"))
+        self.L_text.setText(_translate("PlotDialog", "<html><head/><body><p><span style=\" font-size:20pt;\">You can choose between lifetime </span></p><p><span style=\" font-size:20pt;\">or only active employees</span></p></body></html>"))
         self.PB_plot_active.setText(_translate("PlotDialog", "plot active"))
         self.PB_plot_all.setText(_translate("PlotDialog", "plot all"))
 

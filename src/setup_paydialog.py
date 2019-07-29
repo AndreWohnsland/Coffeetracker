@@ -29,10 +29,6 @@ class PayDialog(QDialog, Ui_PayDialog):
         self.LE_credit.clicked.connect(lambda: self.ms.lineedit_clicked(self.LE_credit))
         # sets limitation
         self.LE_credit.textChanged.connect(lambda: self.ms.lineedit_changed_number(self.LE_credit))
-    
-    def back_clicked(self):
-        """ Closes the window without any further action. """
-        self.close()
 
     def pay_clicked(self):
         """ First asks the user to proceed then enters the value into db. """
@@ -44,7 +40,7 @@ class PayDialog(QDialog, Ui_PayDialog):
         else:
             # rounds the number down to two digits (best is to limit it even that way)
             pay_amount = round(float(pay_amount),2)
-            user_return = standartbox("Pay amount entered is: {}".format(pay_amount), boxtype="okcancel", okstring="Enter")
+            user_return = standartbox("Pay amount entered is: {} €".format(pay_amount), boxtype="okcancel", okstring="Enter")
             # if the user return is ok (value 1024 in qt) then set the variable to carry on
             if user_return == 1024:
                 enter_credit = True
@@ -71,3 +67,7 @@ class PayDialog(QDialog, Ui_PayDialog):
             self.ms.DB.commit()
             # sets the label according to the credit
             self.ms.update_money_shown(new_money)
+
+    def back_clicked(self):
+        """ Closes the window without any further action. """
+        self.close()

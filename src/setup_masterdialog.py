@@ -28,10 +28,6 @@ class MasterDialog(QDialog, Ui_MasterDialog):
         self.PB_back.clicked.connect(self.back_clicked)
         self.CB_employee.activated.connect(self.combobox_change)
 
-    def back_clicked(self):
-        """ Closes the window without any further action. """
-        self.close()
-
     def change_clicked(self):
         """ Change the employee entried (name and active/inactive). """
         # only runs if the CB is not empy
@@ -42,6 +38,8 @@ class MasterDialog(QDialog, Ui_MasterDialog):
             runfill = self.ms.add_employee_clicked(self.LE_first_name, self.LE_last_name, update=True, id=self.employee_id, checkbox_object=self.CHB_active)
             if runfill:
                 self.CB_employee.clear()
+                self.LE_first_name.clear()
+                self.LE_last_name.clear()
                 self.fill_combobox()
 
     def combobox_change(self):
@@ -70,3 +68,7 @@ class MasterDialog(QDialog, Ui_MasterDialog):
         self.CB_employee.addItem("")
         for employee in self.ms.c.execute(sqlstring):
             self.CB_employee.addItem(" ".join((employee[0], employee[1])))
+
+    def back_clicked(self):
+        """ Closes the window without any further action. """
+        self.close()

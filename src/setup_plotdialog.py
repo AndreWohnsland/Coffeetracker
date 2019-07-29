@@ -43,25 +43,21 @@ class PlotDialog(QDialog, Ui_PlotDialog):
         else:
             bonusstring = ""
             headerstring="(all time)"
-        employee_data = self.ms.c.execute("SELECT first_name, last_name, amount FROM employees{} ORDER BY amount DESC".format(bonusstring))
+        employee_data = self.ms.c.execute("SELECT first_name, last_name, amount FROM employees{} ORDER BY amount DESC LIMIT 5".format(bonusstring))
         namelist = []
         amountlist =  []
-        # generates a list of the employees and values for later plotting, currently only prints them out
+        # generates a list of the employees and values for later plotting, only picks up the five highest
         for number, row in enumerate(employee_data):
-            if number == 5:
-                break
             last_name = row[1]
-            namelist.append("      {} {}.".format(row[0], last_name[0]))
+            namelist.append("{} {}.".format(row[0], last_name[0]))
             amountlist.append(row[2])
-        print(20*"-")
-        for name, amount in zip(namelist, amountlist):
-            print(name, amount)
-        self.graphwindow = GraphWindow(self, plotvalues=amountlist, plotlabels=namelist, headerstring=headerstring)
-        self.graphwindow.show()
-        # y_pos = np.arange(len(namelist))
-        # plt.barh(y_pos, amountlist, align='center')
-        # plt.yticks(y_pos, namelist)
-        # plt.show()
+        # just for plotting the values of the output
+        # print(20*"-")
+        # for name, amount in zip(namelist, amountlist):
+        #     print(name, amount)
+        # opens up the window for the plot
+        self.graphwindow = GraphWindow(self, plotvalues=amountlist[::-1], plotlabels=namelist[::-1], headerstring=headerstring)
+        self.graphwindow.showFullScreen()
 
     def back_clicked(self):
         """ Closes the window without any further action. """
@@ -69,20 +65,39 @@ class PlotDialog(QDialog, Ui_PlotDialog):
 
 
 class GraphWindow(QDialog):
-    """ A Popup window to show a graph of the user with the most quantities. """
+    """
+    Opens up a window where the the top five coffee trinke are shown.
+
+    Parameters:
+        -- plotvalues: The values for the bars
+        -- plotlabels: The labels for the bars
+        -- headerstring: Depreciated, renames the window titel, is not shown anymore in fullscreen
+    """
     def __init__(self, parent, plotvalues=None, plotlabels=None, headerstring="all time"):
         super(GraphWindow, self).__init__(parent)
         self.resize(480, 320)
-        self.setMinimumSize(QSize(480, 320))
+        self.setMinimumSize(QSize(0, 0))
         self.setMaximumSize(QSize(480, 320))
         self.setWindowTitle("Leaderboard {}".format(headerstring))
+        self.setModal(True)
         # a figure instance to plot on
-        self.figure = plt.figure()
+        self.figure = plt.figure(figsize=(2.874, 1.916), dpi=167)
+        # adds a button to go back
+        self.backbutton = QPushButton('< Back')
+        # sets the minimum size and the fontsize
+        self.backbutton.setMinimumSize(QSize(0, 50))
+        font = QFont()
+        font.setPointSize(20)
+        font.setBold(True)
+        font.setWeight(75)
+        self.backbutton.setFont(font)
+        self.backbutton.clicked.connect(self.back_clicked)
         # this is the Canvas Widget that displays the `figure`
         # it takes the `figure` instance as a parameter to __init__
         self.canvas = FigureCanvas(self.figure)
         # set the layout
         layout = QVBoxLayout()
+        layout.addWidget(self.backbutton)
         layout.addWidget(self.canvas)
         self.setLayout(layout)
         # clears the old values and then adds a subplot to isert all the data
@@ -94,7 +109,7 @@ class GraphWindow(QDialog):
         ax.barh(y_pos, plotvalues, tick_label=plotlabels, zorder=3)
         # gets the numbers in front of each bar
         for i, v in enumerate(plotvalues):
-            ax.text(max(plotvalues)/50, i-0.05, str(v), color='w', fontweight='bold', va='center', fontsize=14)
+            ax.text(max(plotvalues)/50, i-0.05, str(v), color='w', fontweight='bold', va='center', fontsize=10)
         # removes the ticks from each axis
         for ticx in ax.xaxis.get_major_ticks():
             ticx.tick1On = ticx.tick2On = False
@@ -107,8 +122,12 @@ class GraphWindow(QDialog):
         ax.spines['top'].set_color('w')
         ax.spines['left'].set_color('w')
         ax.spines['right'].set_color('w')
-        plt.setp(ax.get_xticklabels(), color="w", fontsize=12)
-        plt.setp(ax.get_yticklabels(), color="w", fontsize=12)
+        plt.setp(ax.get_xticklabels(), color="w", fontsize=8)
+        plt.setp(ax.get_yticklabels(), color="w", fontsize=8)
         plt.tight_layout()
         # refresh canvas
         self.canvas.draw()
+
+    def back_clicked(self):
+        """ Closes the window. """
+        self.close()
