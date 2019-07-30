@@ -169,6 +169,8 @@ class Ui_PlotDialog(object):
         self.horizontalLayout.addWidget(self.PB_dummy)
         self.verticalLayout_3.addLayout(self.horizontalLayout)
         self.L_text = QtWidgets.QLabel(PlotDialog)
+        self.L_text.setMinimumSize(QtCore.QSize(0, 110))
+        self.L_text.setMaximumSize(QtCore.QSize(16777215, 110))
         font = QtGui.QFont()
         font.setPointSize(20)
         self.L_text.setFont(font)

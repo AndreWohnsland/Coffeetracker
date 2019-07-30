@@ -47,7 +47,7 @@ class PlotDialog(QDialog, Ui_PlotDialog):
         namelist = []
         amountlist =  []
         # generates a list of the employees and values for later plotting, only picks up the five highest
-        for number, row in enumerate(employee_data):
+        for row in employee_data:
             last_name = row[1]
             namelist.append("{} {}.".format(row[0], last_name[0]))
             amountlist.append(row[2])
