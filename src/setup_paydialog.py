@@ -54,13 +54,12 @@ class PayDialog(QDialog, Ui_PayDialog):
             self.ms.update_money_shown(new_money)
     
     def undo_clicked(self):
-        """ Undo the last coffee entry. It just removes one time payment and amount from the list """
+        """ Undo the last quantity entry. It just removes one time payment and amount from the list """
         # asks the user if he wants to remove his last entry, if so, carries on in the process
         user_return = standartbox("Remove the last entry for this employee?", boxtype="okcancel", okstring="Yes", cancelstring="No")
         if user_return == 1024:
-            dummy_costs = 0.25
             current_money = self.ms.c.execute("SELECT money FROM employees WHERE ID = ?",(self.employee_id,)).fetchone()[0]
-            new_money = current_money + dummy_costs
+            new_money = current_money + self.ms.quantcosts
             self.ms.c.execute("UPDATE OR IGNORE employees SET money = ?, amount = amount - 1 WHERE ID = ?",(new_money, self.employee_id))
             # deletes the last entry of the employee in the tracking list
             self.ms.c.execute("DELETE FROM tracks WHERE Number=(SELECT max(Number) FROM tracks WHERE employee_ID=?)",(self.employee_id,))

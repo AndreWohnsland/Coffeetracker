@@ -229,7 +229,7 @@ class Ui_PayDialog(object):
         self.L_user.setText(_translate("PayDialog", "Username"))
         self.PB_undo.setText(_translate("PayDialog", "Undo Last"))
 
-from clickablelineedit import ClickableLineEdit
+from ui_elements.clickablelineedit import ClickableLineEdit
 
 if __name__ == "__main__":
     import sys

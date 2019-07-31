@@ -251,7 +251,7 @@ class Ui_OptionDialog(object):
         self.PB_add_employee.setText(_translate("OptionDialog", "Add new"))
         self.PB_master.setText(_translate("OptionDialog", "Master"))
 
-from clickablelineedit import ClickableLineEdit
+from ui_elements.clickablelineedit import ClickableLineEdit
 
 if __name__ == "__main__":
     import sys

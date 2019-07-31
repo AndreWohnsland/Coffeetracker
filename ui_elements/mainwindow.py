@@ -141,6 +141,10 @@ class Ui_MainWindow(object):
 "\n"
 "#L_money {\n"
 "    color: rgb(239, 151, 0);\n"
+"}\n"
+"\n"
+"#L_paymentcall{\n"
+"    color: rgb(255, 0, 0);\n"
 "}")
         self.centralwidget = QtWidgets.QWidget(MainWindow)
         self.centralwidget.setObjectName("centralwidget")
@@ -177,6 +181,16 @@ class Ui_MainWindow(object):
         self.L_money.setObjectName("L_money")
         self.horizontalLayout.addWidget(self.L_money)
         self.verticalLayout.addLayout(self.horizontalLayout)
+        self.L_paymentcall = QtWidgets.QLabel(self.centralwidget)
+        self.L_paymentcall.setMaximumSize(QtCore.QSize(16777215, 30))
+        font = QtGui.QFont()
+        font.setPointSize(20)
+        font.setBold(True)
+        font.setWeight(75)
+        self.L_paymentcall.setFont(font)
+        self.L_paymentcall.setAlignment(QtCore.Qt.AlignCenter)
+        self.L_paymentcall.setObjectName("L_paymentcall")
+        self.verticalLayout.addWidget(self.L_paymentcall)
         spacerItem = QtWidgets.QSpacerItem(20, 40, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding)
         self.verticalLayout.addItem(spacerItem)
         self.PB_add_quant = QtWidgets.QPushButton(self.centralwidget)
@@ -219,6 +233,7 @@ class Ui_MainWindow(object):
         MainWindow.setWindowTitle(_translate("MainWindow", "Cofeetracker"))
         self.label.setText(_translate("MainWindow", "Select name / choose option"))
         self.L_money.setText(_translate("MainWindow", "<html><head/><body><p><span style=\" color:#ef9700;\">Credit</span></p></body></html>"))
+        self.L_paymentcall.setText(_translate("MainWindow", "please consider paying debts"))
         self.PB_add_quant.setText(_translate("MainWindow", "Add one coffe to employee"))
         self.PB_pay.setText(_translate("MainWindow", "Pay my debts"))
         self.PB_options.setText(_translate("MainWindow", "Options"))

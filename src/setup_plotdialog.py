@@ -66,7 +66,7 @@ class PlotDialog(QDialog, Ui_PlotDialog):
 
 class GraphWindow(QDialog):
     """
-    Opens up a window where the the top five coffee trinke are shown.
+    Opens up a window where the the top five useres (highes quantity) are shown.
 
     Parameters:
         -- plotvalues: The values for the bars

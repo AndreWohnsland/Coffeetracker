@@ -251,7 +251,7 @@ class Ui_MasterDialog(object):
         self.PB_change.setText(_translate("MasterDialog", "change"))
         self.CHB_active.setText(_translate("MasterDialog", "  active"))
 
-from clickablelineedit import ClickableLineEdit
+from ui_elements.clickablelineedit import ClickableLineEdit
 
 if __name__ == "__main__":
     import sys

@@ -27,6 +27,8 @@ class MasterDialog(QDialog, Ui_MasterDialog):
         self.PB_change.clicked.connect(self.change_clicked)
         self.PB_back.clicked.connect(self.back_clicked)
         self.CB_employee.activated.connect(self.combobox_change)
+        self.LE_first_name.clicked.connect(lambda: self.ms.lineedit_clicked(self.LE_first_name))
+        self.LE_last_name.clicked.connect(lambda: self.ms.lineedit_clicked(self.LE_last_name))
 
     def change_clicked(self):
         """ Change the employee entried (name and active/inactive). """
