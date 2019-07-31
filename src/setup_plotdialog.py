@@ -112,9 +112,11 @@ class GraphWindow(QDialog):
             ax.text(max(plotvalues)/50, i-0.05, str(v), color='w', fontweight='bold', va='center', fontsize=10)
         # removes the ticks from each axis
         for ticx in ax.xaxis.get_major_ticks():
-            ticx.tick1On = ticx.tick2On = False
+            ticx.tick1line.set_visible(False)
+            ticx.tick2line.set_visible(False)
         for ticy in ax.yaxis.get_major_ticks():
-            ticy.tick1On = ticy.tick2On = False
+            ticy.tick1line.set_visible(False)
+            ticy.tick2line.set_visible(False)
         # recolours the style into invers (black is white, white is black)
         self.figure.patch.set_facecolor('k')
         ax.patch.set_facecolor('k')
