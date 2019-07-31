@@ -16,13 +16,15 @@ from src.setup_paydialog import PayDialog
 class MainScreen(QMainWindow, Ui_MainWindow):
     """ Creates the mainwindow where the user will be on startup.
 
-        Attributes for Init:
-            devenvironment (Bool): For development purposes, deactivates imports and commands 
-                which are specific to the Raspberry Pi or the use of a touchscreen.
-            DB (path): Path to the Database, or where the DB will be stored.
+    Attributes for Init:
+        -- devenvironment (Bool): For development purposes, deactivates imports and commands 
+            which are specific to the Raspberry Pi or the use of a touchscreen.
+        -- DB (path): Path to the Database, or where the DB will be stored.
+        -- paymentcall_treshhold (int or float): Value at which debts the call to payment label is shown.
+        -- quantcost (float): Cost of one quantity in Euro.
     """
 
-    def __init__(self, devenvironment, db_path=None, parent=None):
+    def __init__(self, devenvironment, db_path=None, paymentcall_treshhold=20, quantcosts=0.25, quantname="coffee", parent=None):
         """ Init function for the MainWindow Class. """
         super(MainScreen, self).__init__(parent)
         self.setupUi(self)
@@ -41,11 +43,24 @@ class MainScreen(QMainWindow, Ui_MainWindow):
         self.CB_employee.activated.connect(self.combobox_change)
         # loads all the active names into the DB
         self.fillenabled_combobox()
+        self.L_money.setText("")
+        self.L_paymentcall.setText("")
         # Generates the ID, the Name and the first/last name
         self.employee_name = ""
         self.employee_first_name = ""
         self.employee_last_name = ""
         self.employee_id = 0
+        # assigns the two values for calculating the threshold and the cost of one quantity
+        self.quantcosts = quantcosts
+        self.paymentcall_treshhold = paymentcall_treshhold
+        # sets a critical treshhold where the User gets some more pressure to pay his debts
+        # this could be in form of an email or an addition window promt form
+        # this is a factor of the normal payment call, it can depent on the product
+        # currently it is 1.5 of the normal treshhold
+        self.critical_treshhold = self.paymentcall_treshhold * 1.5
+        # if there shall be another quantity name than coffee, so be it
+        self.quantname = quantname
+        self.PB_add_quant.setText(f"Add {self.quantname} to user")
 
     def add_quant_clicked(self):
         """ Adds one quantity to the employee. """
@@ -55,7 +70,8 @@ class MainScreen(QMainWindow, Ui_MainWindow):
             # if the user didnt select a name it will fail.
             standartbox("Please select a name!")
         else:
-            user_return = standartbox("Enter a coffee to user", boxtype="okcancel", okstring="Yes", cancelstring="No")
+            box_first_name = str(self.CB_employee.currentText()).split()[0]
+            user_return = standartbox(f"Enter a {self.quantname} to user {box_first_name}?", boxtype="okcancel", okstring="Yes", cancelstring="No")
             # if the user return is ok (value 1024 in qt) then set the variable to carry on
             if user_return == 1024:
                 enter_quant = True
@@ -63,13 +79,13 @@ class MainScreen(QMainWindow, Ui_MainWindow):
             # split the cb (since it displays first and lastname as onne)
             exist_employee = self.c.execute("SELECT COUNT(*) FROM employees WHERE first_name = ? and last_name = ?", (self.employee_first_name, self.employee_last_name)).fetchone()[0]
             if exist_employee:
-                # also gets the time to insert into the tracking table, the costs are currently here as dummy, later a better solution needs to established
-                dummy_costs = 0.25
+                # also gets the time to insert into the tracking table, updates the label and checks if the user exceeded the critical amount of debts
                 time_now = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-                self.c.execute("UPDATE OR IGNORE employees SET amount = amount + 1, money = money - ? WHERE ID = ?", (dummy_costs, self.employee_id))
+                self.c.execute("UPDATE OR IGNORE employees SET amount = amount + 1, money = money - ? WHERE ID = ?", (self.quantcosts, self.employee_id))
                 self.c.execute("INSERT OR IGNORE INTO tracks(employee_ID, time) VALUES(?, ?)", (self.employee_id, time_now))
                 self.DB.commit()
-                self.combobox_change()
+                money = self.c.execute("SELECT money FROM employees WHERE ID = ?",(self.employee_id,)).fetchone()[0]
+                self.update_money_shown(money, criticalcheck=True)
             else:
                 # this should never happen
                 standartbox("Ough! Somehow the employee doesn't exist in the Database!")
@@ -103,7 +119,7 @@ class MainScreen(QMainWindow, Ui_MainWindow):
             first_name, last_name = employee_name.split()
             money, employee_id = self.c.execute("SELECT money, ID FROM employees WHERE first_name = ? and last_name = ?", (first_name, last_name)).fetchone()[0:2]
             # sets the label according to the credit
-            self.update_money_shown(money)
+            self.update_money_shown(money, criticalcheck=True)
             # updates the attributes of our class object (employee properties)
             self.employee_first_name = first_name
             self.employee_last_name = last_name
@@ -111,6 +127,7 @@ class MainScreen(QMainWindow, Ui_MainWindow):
             self.employee_id = employee_id
         else:
             self.L_money.setText("")
+            self.L_paymentcall.setText("")
             # updates the attributes of our class object (employee properties)
             self.employee_first_name = ""
             self.employee_last_name = ""
@@ -127,8 +144,10 @@ class MainScreen(QMainWindow, Ui_MainWindow):
         elif inputtype == "np":
             print("numpad")
 
-    def update_money_shown(self, money):
-        """ Updates the label in the mainscreen which shows the money. """
+    def update_money_shown(self, money, criticalcheck=False):
+        """ Updates the label in the mainscreen which shows the money.
+        Only displays the critical warning at a coffe add (set to true), at other points it would get annoying.
+        """
         # sets the label according to the credit
         prefix = ""
         if money < 0:
@@ -136,6 +155,15 @@ class MainScreen(QMainWindow, Ui_MainWindow):
         elif money > 0:
             prefix = "+"
         self.L_money.setText("{} {:.2f} €".format(prefix, abs(money)))
+        # if the money exceeds a given value, then displays the payment call
+        # the input is a positive number, since debts are negative we need to invert it!
+        if (-1 * money) >= self.paymentcall_treshhold:
+            self.L_paymentcall.setText("please consider paying debts")
+        else:
+            self.L_paymentcall.setText("")
+        #also checks the critical treshhold if so prompts an message
+        if (-1 * money) >= self.critical_treshhold and criticalcheck:
+            standartbox("You should really considering paying your debts! You slacker!!")
 
     def lineedit_changed_number(self, le_object, max_decimals=2, max_text_length=2):
         """ Method to limit the lineedits entry to a set length/decimals"""
@@ -200,6 +228,7 @@ class MainScreen(QMainWindow, Ui_MainWindow):
                 self.DB.commit()
                 self.CB_employee.clear()
                 self.fillenabled_combobox()
+                self.L_money.clear()
                 standartbox("Employee {} {} was updated!".format(first_name, last_name))
                 return True
             else:

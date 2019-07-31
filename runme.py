@@ -8,6 +8,9 @@ devenvironment = True
 app_width = 480
 app_height = 320
 db_name = "tracker_test"
+paymentcall_treshhold = 5
+quantcosts = 0.5
+quantname = "coffee"
 
 # path gerneration for the DB
 subfoldername = "data"
@@ -17,4 +20,12 @@ print(db_path)
 
 if __name__ == "__main__":
     # create_new_db(db_path)
-    create_main_window(devenvironment, db_path, app_width=app_width, app_height=app_height)
+    create_main_window(
+        devenvironment,
+        db_path,
+        app_width=app_width,
+        app_height=app_height,
+        paymentcall_treshhold=paymentcall_treshhold,
+        quantcosts=quantcosts,
+        quantname=quantname
+        )

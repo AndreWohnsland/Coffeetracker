@@ -16,20 +16,22 @@ from src.msgboxgenerate import standartbox
 from ui_elements.paydialog import Ui_PayDialog
 
 
-def create_main_window(devenvironment, db_path, app_width=480, app_height=320):
+def create_main_window(devenvironment, db_path, app_width=480, app_height=320, paymentcall_treshhold=20, quantcosts=0.25, quantname="coffee"):
     """ Creates the mainwindow, need the path of the DB for it. 
     
     Variables:
-        devenvironment (Bool): For development purposes, deactivates imports and commands 
+        -- devenvironment (Bool): For development purposes, deactivates imports and commands 
             which are specific to the Raspberry Pi or the use of a touchscreen.
-        DB (path): Path to the Database
-        app_width (int): Resolution (width) of the touchscreen
-        app_height (int): Resolution (height) of the touchscreen
+        -- DB (path): Path to the Database
+        -- app_width (int): Resolution (width) of the touchscreen
+        -- app_height (int): Resolution (height) of the touchscreen
+        -- paymentcall_treshhold (int or float): Value at which debts the call to payment label is shown.
+        -- quantcost (float): Cost of one quantity in Euro.
     """
     # creates the application
     app = QApplication(sys.argv)
     #creates the mainscreen, sets it to fixed size and fullscreen
-    w = MainScreen(devenvironment, db_path)
+    w = MainScreen(devenvironment, db_path, paymentcall_treshhold=paymentcall_treshhold, quantcosts=quantcosts, quantname=quantname)
     w.showFullScreen()
     w.setFixedSize(app_width, app_height)
     # runs the app until the exit
