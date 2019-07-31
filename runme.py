@@ -8,8 +8,8 @@ devenvironment = True
 app_width = 480
 app_height = 320
 db_name = "tracker_test"
-paymentcall_treshhold = 5
-quantcosts = 0.5
+paymentcall_treshhold = 10
+quantcosts = 0.25
 quantname = "coffee"
 
 # path gerneration for the DB
