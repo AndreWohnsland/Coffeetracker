@@ -36,7 +36,20 @@ pip3 install PyQt5
 
 ## Development on Non-Pi Hardware
 
-As long as you are working on another hardware (for example on a Windows or macOS engine) best is to set the devenv to `True`, it will enable your cursor on the touchscreen:
+As long as you are working on another hardware (for example on a Windows or macOS engine) best is to set the `devenvironment` to `True`, it will enable your cursor on the touchscreen:
 ```python
 devenvironment = True
+```
+
+## Setting up the Program Parameters
+There are some options before the first start you can set. For usual testing i recommend setting `devenvironment` to `True` for programming and adjustments, otherwise set it to false. The `app_width` and `app_height` parameters refer to your touchscreen resolution. In this case its a 3.5" Screen. As a DB name, you can choose whatever name you find fitting or prefer.\
+For the quantities there are basically three options: First, you can set a price on the quantity, if it costs nothing you can set it to zero. Then you can name the quantity, in our case it's coffee. And lastly, you can set a threshold, at which a call to payment label is shown when the according user is selected. Furthermore, if the threshold is exceeded by factor 1.5 (feel free to change it in you code) the user will also get a messagebox reminding him to pay (we could even go further with emailing or stuff like that, if we implement the email address into our DB).
+```python
+devenvironment = True           # enables or disables your cursor
+app_width = 480
+app_height = 320
+db_name = "tracker_test"    
+paymentcall_threshold = 10      # When the pay message got displayed (critical is 1.5 that value)
+quantcosts = 0.25               # cost of one quant (can also be 0)
+quantname = "coffee"            # name of your quants 
 ```
