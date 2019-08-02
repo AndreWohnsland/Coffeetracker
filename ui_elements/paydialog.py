@@ -153,6 +153,7 @@ class Ui_PayDialog(object):
 "#L_user {\n"
 "    color: rgb(239, 151, 0);\n"
 "}")
+        PayDialog.setModal(True)
         self.verticalLayout_3 = QtWidgets.QVBoxLayout(PayDialog)
         self.verticalLayout_3.setObjectName("verticalLayout_3")
         self.horizontalLayout = QtWidgets.QHBoxLayout()

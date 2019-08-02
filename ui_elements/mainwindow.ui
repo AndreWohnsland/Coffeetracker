@@ -201,7 +201,7 @@ QComboBox:on { /* shift the text when the popup opens */
          </font>
         </property>
         <property name="maxVisibleItems">
-         <number>6</number>
+         <number>5</number>
         </property>
        </widget>
       </item>

@@ -167,7 +167,7 @@ class Ui_MainWindow(object):
         font = QtGui.QFont()
         font.setPointSize(18)
         self.CB_employee.setFont(font)
-        self.CB_employee.setMaxVisibleItems(6)
+        self.CB_employee.setMaxVisibleItems(5)
         self.CB_employee.setObjectName("CB_employee")
         self.horizontalLayout.addWidget(self.CB_employee)
         self.L_money = QtWidgets.QLabel(self.centralwidget)

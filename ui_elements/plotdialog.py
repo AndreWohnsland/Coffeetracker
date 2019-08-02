@@ -145,6 +145,7 @@ class Ui_PlotDialog(object):
 "#L_text {\n"
 "    color: rgb(239, 151, 0);\n"
 "}")
+        PlotDialog.setModal(True)
         self.verticalLayout_3 = QtWidgets.QVBoxLayout(PlotDialog)
         self.verticalLayout_3.setObjectName("verticalLayout_3")
         self.horizontalLayout = QtWidgets.QHBoxLayout()

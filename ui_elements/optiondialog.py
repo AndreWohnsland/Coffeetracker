@@ -149,7 +149,7 @@ class Ui_OptionDialog(object):
 "#LE_first_name {\n"
 "    color: rgb(239, 151, 0);\n"
 "}")
-        OptionDialog.setModal(False)
+        OptionDialog.setModal(True)
         self.verticalLayout_3 = QtWidgets.QVBoxLayout(OptionDialog)
         self.verticalLayout_3.setObjectName("verticalLayout_3")
         self.horizontalLayout = QtWidgets.QHBoxLayout()

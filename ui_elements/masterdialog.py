@@ -146,6 +146,7 @@ class Ui_MasterDialog(object):
 "#CHB_active {\n"
 "    color: rgb(239, 151, 0);\n"
 "}")
+        MasterDialog.setModal(True)
         self.verticalLayout_3 = QtWidgets.QVBoxLayout(MasterDialog)
         self.verticalLayout_3.setObjectName("verticalLayout_3")
         self.horizontalLayout = QtWidgets.QHBoxLayout()
