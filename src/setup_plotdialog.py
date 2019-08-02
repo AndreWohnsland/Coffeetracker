@@ -2,6 +2,7 @@ import sys
 import sqlite3
 import datetime
 import matplotlib.pyplot as plt
+import matplotlib.colors as mcolors
 import numpy as np
 
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
@@ -106,7 +107,10 @@ class GraphWindow(QDialog):
         # plots a horizontal bargraph with the values and the namelabels
         y_pos = np.arange(len(plotlabels))
         ax.xaxis.grid(linestyle='--', color='w', zorder=0)
-        ax.barh(y_pos, plotvalues, tick_label=plotlabels, zorder=3)
+        # generates a color grade from red to blue
+        clist = [(0, '#1f77b4'), (1, '#d62728')]
+        rvb = mcolors.LinearSegmentedColormap.from_list("", clist)
+        ax.barh(y_pos, plotvalues, tick_label=plotlabels, zorder=3, height=0.9, color=rvb(y_pos/len(plotlabels)))
         # gets the numbers in front of each bar
         for i, v in enumerate(plotvalues):
             ax.text(max(plotvalues)/50, i-0.05, str(v), color='w', fontweight='bold', va='center', fontsize=10)
