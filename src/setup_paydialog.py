@@ -40,11 +40,11 @@ class PayDialog(QDialog, Ui_PayDialog):
         pay_amount = self.LE_credit.text()
         # Only carries on if a value is given
         if pay_amount == "":
-            standartbox("No value to pay given!")
+            standartbox("No value to pay given!", parent=self)
         else:
             # rounds the number down to two digits (best is to limit it even that way)
             pay_amount = round(float(pay_amount),2)
-            user_return = standartbox("Pay amount entered is: {} €".format(pay_amount), boxtype="okcancel", okstring="Enter")
+            user_return = standartbox("Pay amount entered is: {} €".format(pay_amount), boxtype="okcancel", okstring="Enter", parent=self)
             # if the user return is ok (value 1024 in qt) then set the variable to carry on
             if user_return == 1024:
                 enter_credit = True
@@ -54,13 +54,13 @@ class PayDialog(QDialog, Ui_PayDialog):
             new_money = self.ms.c.execute("SELECT money FROM employees WHERE ID = ?",(self.employee_id,)).fetchone()[0]
             self.ms.DB.commit()
             self.LE_credit.setText("")
-            standartbox("Your payment has been entered!")
+            standartbox("Your payment has been entered!", parent=self)
             self.ms.update_money_shown(new_money)
     
     def undo_clicked(self):
         """ Undo the last quantity entry. It just removes one time payment and amount from the list """
         # asks the user if he wants to remove his last entry, if so, carries on in the process
-        user_return = standartbox("Remove the last entry for this employee?", boxtype="okcancel", okstring="Yes", cancelstring="No")
+        user_return = standartbox("Remove the last entry for this employee?", boxtype="okcancel", okstring="Yes", cancelstring="No", parent=self)
         if user_return == 1024:
             current_money = self.ms.c.execute("SELECT money FROM employees WHERE ID = ?",(self.employee_id,)).fetchone()[0]
             new_money = current_money + self.ms.quantcosts

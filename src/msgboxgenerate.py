@@ -5,14 +5,14 @@ from PyQt5.QtWidgets import *
 from PyQt5.uic import *
 
 
-def standartbox(textstring, boxtype="standard", okstring="OK", cancelstring="Cancel"):
+def standartbox(textstring, boxtype="standard", okstring="OK", cancelstring="Cancel", parent=None):
     """ The default messagebox for the Maker. Uses a QMessageBox with OK-Button 
     Boxtypes are:
         standard: Only an ok button and a text
-        okcancel: Text with option to okay or cancel
+        okcancel: Text with option to okay or cancel 
     """
     # print(textstring)
-    msgBox = QMessageBox()
+    msgBox = QMessageBox(parent)
     if boxtype == "standard":
         msgBox.setStandardButtons(QMessageBox.Ok)   
     elif boxtype == "okcancel":
@@ -23,9 +23,9 @@ def standartbox(textstring, boxtype="standard", okstring="OK", cancelstring="Can
     buttonok.setText("{: ^12}".format(okstring))
     fillstring = "-" * 40
     msgBox.setText("{0}\n{1}\n{0}".format(fillstring, textstring))
-    msgBox.setStyleSheet(
-        "QMessageBox QPushButton{background-color: rgb(0, 123, 255); color: rgb(0, 0, 0); font-size: 30pt;} QMessageBox{background-color: rgb(10, 10, 10); font-size: 16pt;} QMessageBox QLabel{color: rgb(0, 123, 255);}")
     msgBox.showFullScreen()
+    msgBox.setStyleSheet(
+        "QMessageBox QPushButton{background-color: rgb(0, 123, 255); border-color: rgb(0, 123, 255); color: rgb(0, 0, 0); font-size: 30pt;} QMessageBox{background-color: rgb(10, 10, 10); font-size: 16pt;} QMessageBox QLabel{color: rgb(0, 123, 255); font-size: 16pt;}")
     retval = msgBox.exec_()
     if boxtype == "okcancel":
         # print("value of pressed message box button:", retval)
