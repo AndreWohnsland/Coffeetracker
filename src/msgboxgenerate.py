@@ -25,7 +25,7 @@ def standartbox(textstring, boxtype="standard", okstring="OK", cancelstring="Can
     msgBox.setText("{0}\n{1}\n{0}".format(fillstring, textstring))
     msgBox.showFullScreen()
     msgBox.setStyleSheet(
-        "QMessageBox QPushButton{background-color: rgb(0, 123, 255); border-color: rgb(0, 123, 255); color: rgb(0, 0, 0); font-size: 30pt;} QMessageBox{background-color: rgb(10, 10, 10); font-size: 16pt;} QMessageBox QLabel{color: rgb(0, 123, 255); font-size: 16pt;}")
+        "QMessageBox QPushButton{background-color: rgb(0, 123, 255); border-color: rgb(0, 123, 255); color: rgb(0, 0, 0); font-size: 30pt;} QMessageBox{background-color: rgb(10, 10, 10); font-size: 16pt;} QMessageBox QLabel{background-color: rgb(10, 10, 10); color: rgb(0, 123, 255); font-size: 16pt;}")
     retval = msgBox.exec_()
     if boxtype == "okcancel":
         # print("value of pressed message box button:", retval)
