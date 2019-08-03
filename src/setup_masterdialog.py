@@ -47,6 +47,11 @@ class MasterDialog(QDialog, Ui_MasterDialog):
                 self.LE_first_name.clear()
                 self.LE_last_name.clear()
                 self.fill_combobox()
+                self.employee_id = 0
+                self.ms.employee_id = 0
+                self.ms.employee_name = ""
+                self.ms.employee_first_name = ""
+                self.ms.employee_last_name = ""
 
     def combobox_change(self):
         """ Gets the first and last name, as well the status from the employee. """
@@ -70,8 +75,11 @@ class MasterDialog(QDialog, Ui_MasterDialog):
 
     def fill_combobox(self):
         """ Gets all the values op employees into the cb. """
-        sqlstring = "SELECT first_name, last_name from employees ORDER BY last_name ASC"
+        sqlstring = "SELECT first_name, last_name from employees WHERE enabled = 1 ORDER BY last_name ASC"
         self.CB_employee.addItem("")
+        for employee in self.ms.c.execute(sqlstring):
+            self.CB_employee.addItem(" ".join((employee[0], employee[1])))
+        sqlstring = "SELECT first_name, last_name from employees WHERE enabled = 0 ORDER BY last_name ASC"
         for employee in self.ms.c.execute(sqlstring):
             self.CB_employee.addItem(" ".join((employee[0], employee[1])))
 
