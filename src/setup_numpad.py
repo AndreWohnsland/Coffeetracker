@@ -56,3 +56,10 @@ class NumpadScreen(QDialog, Ui_numpadwindow):
         if len(self.pwlineedit.text()) > 0:
             strstor = str(self.pwlineedit.text())
             self.pwlineedit.setText(strstor[:-1])
+
+    def changeEvent(self, event):
+        if event.type() == QEvent.WindowStateChange:
+            if event.oldState() and Qt.WindowMinimized:
+                print("WindowMinimized")
+            elif event.oldState() == Qt.WindowNoState or self.windowState() == Qt.WindowMaximized:
+                print("WindowMaximized")
