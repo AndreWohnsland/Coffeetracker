@@ -12,6 +12,9 @@ from ui_elements.mainwindow import Ui_MainWindow
 from src.msgboxgenerate import standartbox
 from src.setup_optiondialog import OptionDialog
 from src.setup_paydialog import PayDialog
+from src.setup_numpad import NumpadScreen
+from src.setup_keyboard import KeyboardWidget
+from src.loggerconfig import logerror
 
 class MainScreen(QMainWindow, Ui_MainWindow):
     """ Creates the mainwindow where the user will be on startup.
@@ -22,8 +25,10 @@ class MainScreen(QMainWindow, Ui_MainWindow):
         -- DB (path): Path to the Database, or where the DB will be stored.
         -- paymentcall_threshold (int or float): Value at which debts the call to payment label is shown.
         -- quantcost (float): Cost of one quantity in Euro.
+        -- quantname (string): Name for the quantity
     """
 
+    @logerror
     def __init__(self, devenvironment, db_path=None, paymentcall_threshold=20, quantcosts=0.25, quantname="coffee", parent=None):
         """ Init function for the MainWindow Class. """
         super(MainScreen, self).__init__(parent)
@@ -61,6 +66,7 @@ class MainScreen(QMainWindow, Ui_MainWindow):
         # if there shall be another quantity name than coffee, so be it
         self.quantname = quantname
         self.PB_add_quant.setText(f"Add {self.quantname} to user")
+        print(bug)
 
     def add_quant_clicked(self):
         """ Adds one quantity to the employee. """
@@ -134,15 +140,28 @@ class MainScreen(QMainWindow, Ui_MainWindow):
             self.employee_name = ""
             self.employee_id = 0
 
-    def lineedit_clicked(self, le_to_write, inputtype="kb"):
-        """ Calls a keyboard to write text into a line edit.
-        Alternatively you can call a numpdad
+    @logerror
+    def lineedit_clicked(self, le_to_write, inputtype="kb", max_char_len=30, x_pos=150, y_pos=10):
+        """ Calls a keyboard/numpad to write text into a line edit.
         The mainwindow only got this method and inherits it to its children.
+
+        arguments:
+
+            -- le_to_write (obj): Lineedit were the input gets into
+            -- Inputtype (str): "kb" for keyboard, "np" for numpad
+            -- max_char_len (int): Limits the maximum chars
+            -- x_pos (int): x-position of the numpad (left corner)
+            -- y_pos (int): y-position of the numpad (left corner)
         """
+        print(bug)
         if inputtype == "kb":
-            print("Keyboard")
+            # print("Keyboard")
+            self.keyboard = KeyboardWidget(self, le_to_write, max_char_len=max_char_len)
+            self.keyboard.showFullScreen()
         elif inputtype == "np":
-            print("numpad")
+            # print("numpad")
+            self.numpad = NumpadScreen(self, x_pos=x_pos, y_pos=y_pos, le_to_write=le_to_write)
+            self.numpad.show()
 
     def update_money_shown(self, money, criticalcheck=False):
         """ Updates the label in the mainscreen which shows the money.
@@ -183,9 +202,16 @@ class MainScreen(QMainWindow, Ui_MainWindow):
                     le_value = le_text[:-1]
             except ValueError:
                 le_value = le_text[:-1]
-            # the algorythm kills the dots so if the last digit is a dot just use the text and exclude more than one dot
-            if le_text[-1] == "." and le_text.count(".")<2:
-                le_value = le_text
+            # if there are no decimals, dots are not needed
+            if max_decimals > 0:
+                # the algorythm kills the dots so if the last digit is a dot just use the text and exclude more than one dot
+                if le_text[-1] == "." and le_text.count(".")<2:
+                    le_value = le_text
+                # also need to check if after the dot is a zero, that the zero is not just converted away
+                # this is a bandaid fix, in case of no decimal places it will cause problems so take that in consideration!
+                if len(le_text)>1:
+                    if le_text[-2] == "." and le_text[-1] == "0":
+                        le_value = le_text
             le_object.setText(str(le_value))
 
     def fillenabled_combobox(self):

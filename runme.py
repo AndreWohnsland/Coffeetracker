@@ -1,6 +1,7 @@
 import sys
 import os
 
+from src.loggerconfig import basiclogger
 from ui_elements.setupui import create_main_window
 from data.generate_db import create_new_db
 
@@ -20,6 +21,7 @@ print(db_path)
 
 if __name__ == "__main__":
     # create_new_db(db_path)
+    basiclogger('debuglog', 'debuglog')
     create_main_window(
         devenvironment,
         db_path,

@@ -58,6 +58,7 @@ class Ui_Keyboard(object):
 "    color: rgb(239, 151, 0);\n"
 "}\n"
 "")
+        Keyboard.setModal(True)
         self.verticalLayout = QtWidgets.QVBoxLayout(Keyboard)
         self.verticalLayout.setObjectName("verticalLayout")
         self.horizontalLayout = QtWidgets.QHBoxLayout()

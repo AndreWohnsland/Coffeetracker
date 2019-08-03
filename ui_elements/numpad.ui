@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>PasswordWindow2</class>
- <widget class="QDialog" name="PasswordWindow2">
+ <class>numpadwindow</class>
+ <widget class="QDialog" name="numpadwindow">
   <property name="geometry">
    <rect>
     <x>0</x>
