@@ -27,6 +27,7 @@ class PlotDialog(QDialog, Ui_PlotDialog):
         """ Init function for the MasterDialog class. """
         super(PlotDialog, self).__init__(parent)
         self.setupUi(self)
+        self.setAttribute(Qt.WA_DeleteOnClose)
         self.ms = parent
         # connect the buttons
         self.PB_plot_active.clicked.connect(lambda: self.plot_clicked(active=True))
@@ -76,6 +77,7 @@ class GraphWindow(QDialog):
     """
     def __init__(self, parent, plotvalues=None, plotlabels=None, headerstring="all time"):
         super(GraphWindow, self).__init__(parent)
+        self.setAttribute(Qt.WA_DeleteOnClose)
         self.resize(480, 320)
         self.setMinimumSize(QSize(0, 0))
         self.setMaximumSize(QSize(480, 320))

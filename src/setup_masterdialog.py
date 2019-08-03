@@ -20,6 +20,7 @@ class MasterDialog(QDialog, Ui_MasterDialog):
         """ Init function for the MasterDialog class. """
         super(MasterDialog, self).__init__(parent)
         self.setupUi(self)
+        self.setAttribute(Qt.WA_DeleteOnClose)
         self.ms = parent
         self.fill_combobox()
         self.employee_id = 0

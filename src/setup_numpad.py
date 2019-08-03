@@ -28,6 +28,7 @@ class NumpadScreen(QDialog, Ui_numpadwindow):
             Qt.WindowCloseButtonHint |
             Qt.WindowStaysOnTopHint
             )
+        self.setAttribute(Qt.WA_DeleteOnClose)
         # self.setWindowIcon(QIcon("Cocktail-icon.png"))
         # Connect all the buttons, generates a list of the numbers an objectnames to do that
         self.number_list = [x for x in range(10)]

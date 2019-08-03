@@ -22,6 +22,7 @@ class OptionDialog(QDialog, Ui_OptionDialog):
         """ Init function for the OptionDialog class. """
         super(OptionDialog, self).__init__(parent)
         self.setupUi(self)
+        self.setAttribute(Qt.WA_DeleteOnClose)
         self.ms = parent
         # connects the buttons
         self.PB_back.clicked.connect(self.back_clicked)

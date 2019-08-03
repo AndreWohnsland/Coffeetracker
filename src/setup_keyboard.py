@@ -20,6 +20,7 @@ class KeyboardWidget(QDialog, Ui_Keyboard):
     def __init__(self, parent, le_to_write=None, max_char_len=30):
         super(KeyboardWidget, self).__init__(parent)
         self.setupUi(self)
+        self.setAttribute(Qt.WA_DeleteOnClose)
         self.ms = parent
         self.le_to_write = le_to_write
         self.LName.setText(self.le_to_write.text())

@@ -18,6 +18,7 @@ class PayDialog(QDialog, Ui_PayDialog):
         """ Init function for the OptionDialog class. """
         super(PayDialog, self).__init__(parent)
         self.setupUi(self)
+        self.setAttribute(Qt.WA_DeleteOnClose)
         self.ms = parent
         self.employee_name = self.ms.employee_name
         self.employee_id = self.ms.employee_id
