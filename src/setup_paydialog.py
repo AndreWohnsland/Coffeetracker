@@ -30,7 +30,7 @@ class PayDialog(QDialog, Ui_PayDialog):
         self.PB_back.clicked.connect(self.back_clicked)
         self.PB_pay.clicked.connect(self.pay_clicked)
         self.PB_undo.clicked.connect(self.undo_clicked)
-        self.LE_credit.clicked.connect(lambda: self.ms.lineedit_clicked(self.LE_credit, inputtype="np"))
+        self.LE_credit.clicked.connect(lambda: self.ms.lineedit_clicked(self.LE_credit, inputtype="np", parent=self))
         # sets limitation
         self.LE_credit.textChanged.connect(lambda: self.ms.lineedit_changed_number(self.LE_credit))
 

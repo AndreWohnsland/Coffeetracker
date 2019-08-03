@@ -33,6 +33,8 @@ class NumpadScreen(QDialog, Ui_numpadwindow):
         self.devenvironment = self.ms.devenvironment
         if not self.devenvironment:
             self.setCursor(Qt.BlankCursor)
+        self.x_pos = x_pos
+        self.y_pos = y_pos
         # self.setWindowIcon(QIcon("Cocktail-icon.png"))
         # Connect all the buttons, generates a list of the numbers an objectnames to do that
         self.number_list = [x for x in range(10)]
@@ -41,11 +43,8 @@ class NumpadScreen(QDialog, Ui_numpadwindow):
             obj.clicked.connect(lambda _, n=number: self.number_clicked(number=n))
         self.PBdot.clicked.connect(lambda: self.number_clicked(number="."))
         self.PBdel.clicked.connect(self.del_clicked)
-        self.ms = parent
-        if not self.ms.devenvironment:
-            self.setCursor(Qt.BlankCursor)
         self.pwlineedit = le_to_write
-        self.move(x_pos, y_pos)
+        self.move(self.x_pos, self.y_pos)
 
     def number_clicked(self, number):
         """  Adds the clicked number to the lineedit. """
@@ -61,6 +60,5 @@ class NumpadScreen(QDialog, Ui_numpadwindow):
         if event.type() == QEvent.WindowStateChange:
             if event.oldState() and Qt.WindowMinimized:
                 print("WindowMinimized")
-                event.ignore()
-            elif event.oldState() == Qt.WindowNoState or self.windowState() == Qt.WindowMaximized:
-                print("WindowMaximized")
+                self.showMaximized()
+                self.move(self.x_pos, self.y_pos)

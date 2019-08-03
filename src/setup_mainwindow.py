@@ -138,7 +138,7 @@ class MainScreen(QMainWindow, Ui_MainWindow):
             self.employee_name = ""
             self.employee_id = 0
 
-    def lineedit_clicked(self, le_to_write, inputtype="kb", max_char_len=30, x_pos=150, y_pos=10):
+    def lineedit_clicked(self, le_to_write, inputtype="kb", max_char_len=30, x_pos=150, y_pos=10, parent=None):
         """ Calls a keyboard/numpad to write text into a line edit.
         The mainwindow only got this method and inherits it to its children.
 
@@ -150,14 +150,17 @@ class MainScreen(QMainWindow, Ui_MainWindow):
             -- x_pos (int): x-position of the numpad (left corner)
             -- y_pos (int): y-position of the numpad (left corner)
         """
+        if parent is None:
+            parent = self
         if inputtype == "kb":
             # print("Keyboard")
-            self.keyboard = KeyboardWidget(self, le_to_write, max_char_len=max_char_len)
-            self.keyboard.showFullScreen()
+            parent.keyboard = KeyboardWidget(parent, le_to_write, max_char_len=max_char_len)
+            parent.keyboard.showFullScreen()
         elif inputtype == "np":
             # print("numpad")
-            self.numpad = NumpadScreen(self, x_pos=x_pos, y_pos=y_pos, le_to_write=le_to_write)
-            self.numpad.show()
+            parent.numpad = NumpadScreen(parent, x_pos=x_pos, y_pos=y_pos, le_to_write=le_to_write)
+            parent.numpad.showMaximized()
+            parent.numpad.move(x_pos, y_pos)
 
     def update_money_shown(self, money, criticalcheck=False):
         """ Updates the label in the mainscreen which shows the money.
