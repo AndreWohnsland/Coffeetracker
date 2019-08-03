@@ -20,6 +20,9 @@ class PayDialog(QDialog, Ui_PayDialog):
         self.setupUi(self)
         self.setAttribute(Qt.WA_DeleteOnClose)
         self.ms = parent
+        self.devenvironment = self.ms.devenvironment
+        if not self.devenvironment:
+            self.setCursor(Qt.BlankCursor)
         self.employee_name = self.ms.employee_name
         self.employee_id = self.ms.employee_id
         self.L_user.setText(self.employee_name)

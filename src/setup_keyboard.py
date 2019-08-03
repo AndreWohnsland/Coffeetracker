@@ -22,6 +22,9 @@ class KeyboardWidget(QDialog, Ui_Keyboard):
         self.setupUi(self)
         self.setAttribute(Qt.WA_DeleteOnClose)
         self.ms = parent
+        self.devenvironment = self.ms.devenvironment
+        if not self.devenvironment:
+            self.setCursor(Qt.BlankCursor)
         self.le_to_write = le_to_write
         self.LName.setText(self.le_to_write.text())
         # populating all the buttons

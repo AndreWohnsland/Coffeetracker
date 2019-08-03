@@ -29,6 +29,10 @@ class NumpadScreen(QDialog, Ui_numpadwindow):
             Qt.WindowStaysOnTopHint
             )
         self.setAttribute(Qt.WA_DeleteOnClose)
+        self.ms = parent
+        self.devenvironment = self.ms.devenvironment
+        if not self.devenvironment:
+            self.setCursor(Qt.BlankCursor)
         # self.setWindowIcon(QIcon("Cocktail-icon.png"))
         # Connect all the buttons, generates a list of the numbers an objectnames to do that
         self.number_list = [x for x in range(10)]

@@ -24,6 +24,9 @@ class OptionDialog(QDialog, Ui_OptionDialog):
         self.setupUi(self)
         self.setAttribute(Qt.WA_DeleteOnClose)
         self.ms = parent
+        self.devenvironment = self.ms.devenvironment
+        if not self.devenvironment:
+            self.setCursor(Qt.BlankCursor)
         # connects the buttons
         self.PB_back.clicked.connect(self.back_clicked)
         self.PB_leaderboard.clicked.connect(self.leaderboard_clicked)

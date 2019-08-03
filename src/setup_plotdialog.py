@@ -29,6 +29,9 @@ class PlotDialog(QDialog, Ui_PlotDialog):
         self.setupUi(self)
         self.setAttribute(Qt.WA_DeleteOnClose)
         self.ms = parent
+        self.devenvironment = self.ms.devenvironment
+        if not self.devenvironment:
+            self.setCursor(Qt.BlankCursor)
         # connect the buttons
         self.PB_plot_active.clicked.connect(lambda: self.plot_clicked(active=True))
         self.PB_plot_all.clicked.connect(lambda: self.plot_clicked(active=False))
@@ -83,6 +86,10 @@ class GraphWindow(QDialog):
         self.setMaximumSize(QSize(480, 320))
         self.setWindowTitle("Leaderboard {}".format(headerstring))
         self.setModal(True)
+        self.ms = parent
+        self.devenvironment = self.ms.devenvironment
+        if not self.devenvironment:
+            self.setCursor(Qt.BlankCursor)
         # a figure instance to plot on
         self.figure = plt.figure(figsize=(2.874, 1.916), dpi=167)
         # adds a button to go back
