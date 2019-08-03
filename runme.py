@@ -8,7 +8,7 @@ from data.generate_db import create_new_db
 devenvironment = True           # enables or disables your cursor
 app_width = 480
 app_height = 320
-db_name = "tracker_test"    
+db_name = "employees_dummy"    
 paymentcall_threshold = 10      # When the pay message got displayed (critical is 1.5 that value)
 quantcosts = 0.25               # cost of one quant (can also be 0)
 quantname = "coffee"            # name of your quants
@@ -20,7 +20,7 @@ db_path = os.path.join(dirpath, subfoldername, "{}.db".format(db_name))
 print(db_path)
 
 if __name__ == "__main__":
-    # create_new_db(db_path)
+    create_new_db(db_path)
     basiclogger('debuglog', 'debuglog')
     create_main_window(
         devenvironment,
