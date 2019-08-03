@@ -61,5 +61,6 @@ class NumpadScreen(QDialog, Ui_numpadwindow):
         if event.type() == QEvent.WindowStateChange:
             if event.oldState() and Qt.WindowMinimized:
                 print("WindowMinimized")
+                event.ignore()
             elif event.oldState() == Qt.WindowNoState or self.windowState() == Qt.WindowMaximized:
                 print("WindowMaximized")
