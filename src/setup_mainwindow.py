@@ -28,7 +28,6 @@ class MainScreen(QMainWindow, Ui_MainWindow):
         -- quantname (string): Name for the quantity
     """
 
-    @logerror
     def __init__(self, devenvironment, db_path=None, paymentcall_threshold=20, quantcosts=0.25, quantname="coffee", parent=None):
         """ Init function for the MainWindow Class. """
         super(MainScreen, self).__init__(parent)
@@ -66,7 +65,6 @@ class MainScreen(QMainWindow, Ui_MainWindow):
         # if there shall be another quantity name than coffee, so be it
         self.quantname = quantname
         self.PB_add_quant.setText(f"Add {self.quantname} to user")
-        print(bug)
 
     def add_quant_clicked(self):
         """ Adds one quantity to the employee. """
@@ -140,7 +138,6 @@ class MainScreen(QMainWindow, Ui_MainWindow):
             self.employee_name = ""
             self.employee_id = 0
 
-    @logerror
     def lineedit_clicked(self, le_to_write, inputtype="kb", max_char_len=30, x_pos=150, y_pos=10):
         """ Calls a keyboard/numpad to write text into a line edit.
         The mainwindow only got this method and inherits it to its children.
@@ -153,7 +150,6 @@ class MainScreen(QMainWindow, Ui_MainWindow):
             -- x_pos (int): x-position of the numpad (left corner)
             -- y_pos (int): y-position of the numpad (left corner)
         """
-        print(bug)
         if inputtype == "kb":
             # print("Keyboard")
             self.keyboard = KeyboardWidget(self, le_to_write, max_char_len=max_char_len)
