@@ -159,8 +159,7 @@ class MainScreen(QMainWindow, Ui_MainWindow):
         elif inputtype == "np":
             # print("numpad")
             parent.numpad = NumpadScreen(parent, x_pos=x_pos, y_pos=y_pos, le_to_write=le_to_write)
-            parent.numpad.showMaximized()
-            parent.numpad.move(x_pos, y_pos)
+            parent.numpad.showFullScreen()
 
     def update_money_shown(self, money, criticalcheck=False):
         """ Updates the label in the mainscreen which shows the money.

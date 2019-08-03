@@ -21,13 +21,6 @@ class NumpadScreen(QDialog, Ui_numpadwindow):
         """ Init. Connect all the buttons and set window policy. """
         super(NumpadScreen, self).__init__(parent)
         self.setupUi(self)
-        self.setWindowFlags(
-            Qt.Window |
-            Qt.CustomizeWindowHint |
-            Qt.WindowTitleHint |
-            Qt.WindowCloseButtonHint |
-            Qt.WindowStaysOnTopHint
-            )
         self.setAttribute(Qt.WA_DeleteOnClose)
         self.ms = parent
         self.devenvironment = self.ms.devenvironment
@@ -35,6 +28,8 @@ class NumpadScreen(QDialog, Ui_numpadwindow):
             self.setCursor(Qt.BlankCursor)
         self.x_pos = x_pos
         self.y_pos = y_pos
+        self.LE_money.setText(le_to_write.text())
+        self.le_to_write = le_to_write
         # self.setWindowIcon(QIcon("Cocktail-icon.png"))
         # Connect all the buttons, generates a list of the numbers an objectnames to do that
         self.number_list = [x for x in range(10)]
@@ -43,22 +38,24 @@ class NumpadScreen(QDialog, Ui_numpadwindow):
             obj.clicked.connect(lambda _, n=number: self.number_clicked(number=n))
         self.PBdot.clicked.connect(lambda: self.number_clicked(number="."))
         self.PBdel.clicked.connect(self.del_clicked)
-        self.pwlineedit = le_to_write
-        self.move(self.x_pos, self.y_pos)
+        self.PB_cancel.clicked.connect(self.cancel_clicked)
+        self.PB_ok.clicked.connect(self.enter_clicked)
+        self.LE_money.textChanged.connect(lambda: self.ms.lineedit_changed_number(self.LE_money))
+        # self.move(self.x_pos, self.y_pos)
 
     def number_clicked(self, number):
         """  Adds the clicked number to the lineedit. """
-        self.pwlineedit.setText(self.pwlineedit.text() + "{}".format(number))
+        self.LE_money.setText(self.LE_money.text() + "{}".format(number))
 
     def del_clicked(self):
         """ Deletes the last digit in the lineedit. """
-        if len(self.pwlineedit.text()) > 0:
-            strstor = str(self.pwlineedit.text())
-            self.pwlineedit.setText(strstor[:-1])
+        if len(self.LE_money.text()) > 0:
+            strstor = str(self.LE_money.text())
+            self.LE_money.setText(strstor[:-1])
 
-    def changeEvent(self, event):
-        if event.type() == QEvent.WindowStateChange:
-            if event.oldState() and Qt.WindowMinimized:
-                print("WindowMinimized")
-                self.showMaximized()
-                self.move(self.x_pos, self.y_pos)
+    def enter_clicked(self):
+        self.le_to_write.setText(self.LE_money.text())
+        self.close()
+
+    def cancel_clicked(self):
+        self.close()
