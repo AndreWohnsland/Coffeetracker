@@ -19,7 +19,7 @@ A Raspberry Pi is not directly needed but highly recommended for the use. I use 
 
 ## Features
 
-This app gives you the possibility to select your name and then add a quantity of the given item name to it. If it's desired you can also assign a price to that item, which gets added as debt to the user account. Otherwise the cost can also be set to zero, just to track the amount. Furthermore you can pay your debts or load credit to you account, add new accounts (in case you are not there yet), plot leader boards or change existing entries (e.g. change mistakes in naming or disable users who are not active anymore).
+This app gives you the possibility to select your name and then add a quantity of the given item name to it. If it's desired you can also assign a price to that item, which gets added as debt to the user account. Otherwise the cost can also be set to zero, just to track the amount. Furthermore you can pay your debts or load credit to you account, add new accounts (in case you are not there yet), plot leader boards or change existing entries (e.g. change mistakes in naming or disable users who are not active anymore). There is also a threshold where the call to payment message will appear on the mainscreen. If this threshold is exceeded by the factor 1.5 the usere will also get an active message after each entry, until the debts are reduced again.
 
 Mainscreen where you start:
 
