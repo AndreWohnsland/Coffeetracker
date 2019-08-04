@@ -5,7 +5,7 @@ from PyQt5.QtWidgets import *
 from PyQt5.uic import *
 
 
-def standartbox(textstring, boxtype="standard", okstring="OK", cancelstring="Cancel", parent=None):
+def standartbox(textstring, boxtype="standard", okstring="OK", cancelstring="Cancel", parent=None, devenvironment=True):
     """ The default messagebox for the Maker. Uses a QMessageBox with OK-Button 
     Boxtypes are:
         standard: Only an ok button and a text
@@ -23,6 +23,8 @@ def standartbox(textstring, boxtype="standard", okstring="OK", cancelstring="Can
     buttonok.setText("{: ^12}".format(okstring))
     fillstring = "-" * 40
     msgBox.setText("{0}\n{1}\n{0}".format(fillstring, textstring))
+    if not devenvironment:
+        msgBox.setCursor(Qt.BlankCursor)
     msgBox.showFullScreen()
     msgBox.setStyleSheet(
         "QMessageBox QPushButton{background-color: rgb(0, 123, 255); border-color: rgb(0, 123, 255); color: rgb(0, 0, 0); font-size: 30pt;} QMessageBox{background-color: rgb(10, 10, 10); font-size: 16pt;} QMessageBox QLabel{background-color: rgb(10, 10, 10); color: rgb(0, 123, 255); font-size: 16pt;}")

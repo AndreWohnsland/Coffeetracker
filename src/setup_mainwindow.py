@@ -72,10 +72,10 @@ class MainScreen(QMainWindow, Ui_MainWindow):
         enter_quant = False
         if self.employee_name == "":
             # if the user didnt select a name it will fail.
-            standartbox("Please select a name!", parent=self)
+            standartbox("Please select a name!", parent=self, devenvironment=self.devenvironment)
         else:
             box_first_name = str(self.CB_employee.currentText()).split()[0]
-            user_return = standartbox(f"Enter a {self.quantname} to user {box_first_name}?", boxtype="okcancel", okstring="Yes", cancelstring="No", parent=self)
+            user_return = standartbox(f"Enter a {self.quantname} to user {box_first_name}?", boxtype="okcancel", okstring="Yes", cancelstring="No", parent=self, devenvironment=self.devenvironment)
             # if the user return is ok (value 1024 in qt) then set the variable to carry on
             if user_return == 1024:
                 enter_quant = True
@@ -92,18 +92,18 @@ class MainScreen(QMainWindow, Ui_MainWindow):
                 self.update_money_shown(money, criticalcheck=True)
             else:
                 # this should never happen
-                standartbox("Ough! Somehow the employee doesn't exist in the Database!", parent=self)
+                standartbox("Ough! Somehow the employee doesn't exist in the Database!", parent=self, devenvironment=self.devenvironment)
 
     def pay_clicked(self):
         """ Gives the user the ability to pay his debts. """
         # checks if the employee name is given
         if self.employee_name == "":
-            standartbox("No name selected!", parent=self)
+            standartbox("No name selected!", parent=self, devenvironment=self.devenvironment)
         # select the id and in case of a critical error informs the user
         else:
             # This should also never happen since we will have a id with a selected employee
             if self.employee_id is None or not self.employee_id:
-                standartbox("Sorry, something went wrong!", parent=self)
+                standartbox("Sorry, something went wrong!", parent=self, devenvironment=self.devenvironment)
             else:
                 # opens the paydialog window and passes id as well as name to it.
                 self.paydialog = PayDialog(self)
@@ -180,7 +180,7 @@ class MainScreen(QMainWindow, Ui_MainWindow):
             self.L_paymentcall.setText("")
         #also checks the critical threshold if so prompts an message
         if (-1 * money) >= self.critical_threshold and criticalcheck:
-            standartbox("You should really considering paying your debts! You slacker!!", parent=self)
+            standartbox("You should really considering paying your debts! You slacker!!", parent=self, devenvironment=self.devenvironment)
 
     def lineedit_changed_number(self, le_object, max_decimals=2, max_text_length=2):
         """ Method to limit the lineedits entry to a set length/decimals"""
@@ -229,9 +229,9 @@ class MainScreen(QMainWindow, Ui_MainWindow):
         last_name  = last_name_object.text().replace(" ","").capitalize() 
         # checks if any is empty or less than thress
         if first_name == "" or last_name == "":
-            standartbox("At least one of the names is missing!", parent=self)
+            standartbox("At least one of the names is missing!", parent=self, devenvironment=self.devenvironment)
         elif len(first_name)<3 or len(last_name)<3:
-            standartbox("The names need at least three character!", parent=self)
+            standartbox("The names need at least three character!", parent=self, devenvironment=self.devenvironment)
         else:
             # checks if already exists, else enter into the DB
             name_exists = self.c.execute("SELECT COUNT(*) FROM employees WHERE first_name = ? AND last_name = ?",(first_name, last_name)).fetchone()[0]
@@ -240,7 +240,7 @@ class MainScreen(QMainWindow, Ui_MainWindow):
                 self.DB.commit()
                 first_name_object.clear()
                 last_name_object.clear()
-                standartbox("Employee {} {} was generated!".format(first_name, last_name), parent=self)
+                standartbox("Employee {} {} was generated!".format(first_name, last_name), parent=self, devenvironment=self.devenvironment)
                 self.CB_employee.addItem(" ".join((first_name, last_name)))
                 self.CB_employee.model().sort(0)
             elif update:
@@ -253,8 +253,8 @@ class MainScreen(QMainWindow, Ui_MainWindow):
                 self.CB_employee.clear()
                 self.fillenabled_combobox()
                 self.L_money.clear()
-                standartbox("Employee {} {} was updated!".format(first_name, last_name), parent=self)
+                standartbox("Employee {} {} was updated!".format(first_name, last_name), parent=self, devenvironment=self.devenvironment)
                 return True
             else:
-                standartbox("This employee already exists!", parent=self)
+                standartbox("This employee already exists!", parent=self, devenvironment=self.devenvironment)
         return False

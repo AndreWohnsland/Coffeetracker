@@ -38,7 +38,7 @@ class MasterDialog(QDialog, Ui_MasterDialog):
         """ Change the employee entried (name and active/inactive). """
         # only runs if the CB is not empy
         if self.CB_employee.currentText() == "":
-            standartbox("No employee selected!", parent=self)
+            standartbox("No employee selected!", parent=self, devenvironment=self.devenvironment)
         else:
             # the method of the ms can interrupt it the entry is not correct, therefore it returns only true if it ran without only error
             runfill = self.ms.add_employee_clicked(self.LE_first_name, self.LE_last_name, update=True, id=self.employee_id, checkbox_object=self.CHB_active)
