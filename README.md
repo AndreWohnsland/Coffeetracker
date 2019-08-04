@@ -17,6 +17,24 @@ The packages can usually be installed from Pypi with the `pip install 'packagena
 
 A Raspberry Pi is not directly needed but highly recommended for the use. I use a 3b Model with a 3.5" Screen (480x320 px) and the according casing for that screen to build a cheap an mobile device.
 
+## Features
+
+This app gives you the possibility to select you name and then add a quantity of the given item name to it. If it's desired the item got also a price, which gets added as debt to your account. Otherwise the cost can also set to zero, just to track the amount. Furthermore you can pay your debts or load credit to you account, add new accounts (in case you are not there yet), plot leader boards or change existing entries (e.g. change mistakes in naming or disable users who are not active anymore).
+
+Mainscreen where you start:
+
+![alt text](https://github.com/AndreWohnsland/Coffeetracker/blob/master/pictures/mainscreen.PNG "mainscreen")
+
+Build in keyboard and numpad for typing:
+
+![alt text](https://github.com/AndreWohnsland/Coffeetracker/blob/master/pictures/keyboard.PNG "keyboard")
+![alt text](https://github.com/AndreWohnsland/Coffeetracker/blob/master/pictures/numpad.PNG "numpad")
+
+Plotting the leader board:
+
+![alt text](https://github.com/AndreWohnsland/Coffeetracker/blob/master/pictures/leaderboard.PNG "leaderboard")
+
+
 ## Install PyQt5 on RaspberryPi
 
 You will need at least PyQt5 on your RaspberryPi. More information can be found at [riverbank](https://riverbankcomputing.com/software/pyqt/intro).\
