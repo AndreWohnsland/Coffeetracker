@@ -322,11 +322,18 @@ class GraphWindow(QDialog):
         self.setAttribute(Qt.WA_DeleteOnClose)
         self.resize(800, 600)
         self.setWindowTitle("Leaderboard {}".format(headerstring))
+        self.setWindowFlags(
+            Qt.Window |
+            Qt.CustomizeWindowHint |
+            Qt.WindowTitleHint |
+            Qt.WindowCloseButtonHint |
+            Qt.WindowStaysOnTopHint
+            )
         # self.setModal(True)
         self.ms = parent
 
         # a figure instance to plot on
-        self.figure = plt.figure(figsize=(3, 1.5), dpi=200)
+        self.figure = plt.figure(figsize=(3, 1.5), dpi=220)
         # adds a button to go back
         self.backbutton = QPushButton('< Back')
         # sets the minimum size and the fontsize
