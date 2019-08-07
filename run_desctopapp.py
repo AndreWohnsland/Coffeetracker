@@ -2,6 +2,7 @@ import sys
 import os
 import sqlite3
 import datetime
+import configparser
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.colors as mcolors
@@ -27,10 +28,15 @@ class MainScreen(QMainWindow, Ui_DesctopMainWindow):
         super(MainScreen, self).__init__(parent)
         self.setupUi(self)
 
-        # Connects to the DB
+        # Connects to the DB and the configs
         if db_path is not None:
             self.DB = sqlite3.connect(db_path)
             self.c = self.DB.cursor()
+        config = configparser.ConfigParser()
+        config.read('desctop_ui/employeeconfig.ini')
+        self.default_firstname = config['employee']['firstname']
+        self.default_lastname = config['employee']['lastname']
+        self.default_empid = int(config['employee']['empid'])
         
         # some optical properties 
         self.setWindowIcon(QIcon('desctop_ui/coffee.png'))
@@ -49,7 +55,7 @@ class MainScreen(QMainWindow, Ui_DesctopMainWindow):
 
         # Connect all the Buttons
         self.PB_new.clicked.connect(lambda: self.add_employee(self.LE_firstname, self.LE_lastname))
-        self.PB_default.clicked.connect(self.dummy)
+        self.PB_default.clicked.connect(self.set_config)
         self.PB_pay.clicked.connect(self.pay_clicked)
         self.PB_plot_active.clicked.connect(lambda: self.plot_clicked(active=True))
         self.PB_plot_lifetime.clicked.connect(lambda: self.plot_clicked(active=False))
@@ -72,6 +78,15 @@ class MainScreen(QMainWindow, Ui_DesctopMainWindow):
         # assign the nececary values to the CB
         self.checkboxfill(mode='active', cb_object=self.CB_active)
         self.checkboxfill(cb_object=self.CB_modify)
+
+        # gets the default entry for the CB
+        if self.default_empid != 0:
+            naming = self.c.execute("SELECT first_name, last_name FROM employees WHERE ID = ?", (self.default_empid,)).fetchone()
+            if naming is not None:
+                search_cb = " ".join((naming[0], naming[1]))
+                index = self.CB_active.findText(search_cb, Qt.MatchFixedString)
+                self.CB_active.setCurrentIndex(index)
+        self.checkboxchange(mode='active', cb_object=self.CB_active)
 
     def lineedit_changed_number(self, le_object, max_decimals=2, max_text_length=2):
         """ Method to limit the lineedits entry to a set length/decimals"""
@@ -105,6 +120,18 @@ class MainScreen(QMainWindow, Ui_DesctopMainWindow):
 
     def dummy(self):
         pass
+
+    def set_config(self):
+        """ Changes the default config settings to the selected user. """
+        config = configparser.ConfigParser()
+        config['employee'] = {
+            'firstname': f'{self.employee_first_name}',
+            'lastname': f'{self.employee_last_name}',
+            'empid': f'{self.employee_id}'
+            }
+        with open('desctop_ui/employeeconfig.ini', 'w') as configfile:
+            config.write(configfile)
+        standartbox(f"The User {self.employee_first_name} {self.employee_last_name} was set as default.", parent=self)
 
     def pay_clicked(self):
         """ First asks the user to proceed then enters the value into db. """
@@ -248,7 +275,7 @@ class MainScreen(QMainWindow, Ui_DesctopMainWindow):
             cb_object.addItem(" ".join((employee[0], employee[1])))
 
     def checkboxchange(self, mode='all', cb_object=None):
-        """Refills the Comboboxes, either all names or just active ones.    
+        """Fils the Lineedits, and write the values to them    
         
         Args:
             mode (str, optional): 'all' or 'active' to select according employees. Defaults to 'all'.
@@ -256,8 +283,21 @@ class MainScreen(QMainWindow, Ui_DesctopMainWindow):
         """
         if cb_object is None:
             raise ValueError("There needs to be an Combobox object to write to!")
-        if mode == 'all':
-            employee_name = cb_object.currentText()
+        # first checks if there was any change in naming from another user in the meantime (multiple user can acess so this can happen)
+        # still needs to investigate if cb can have multiple values (shown and intern values) then set intern to id and shown to name!
+        go_on = True
+        employee_name = cb_object.currentText()
+        if employee_name != self.emptystring:
+            first_name, last_name = cb_object.currentText().split()
+            emp_id = self.c.execute("SELECT ID FROM employees WHERE first_name=? AND last_name=?",(first_name, last_name)).fetchone()
+            if emp_id is None:
+                standartbox("Failed to get the old employee name, seems like someone just changed it, reloading dropdown... try again.", parent=self)
+                self.checkboxfill(mode='all', cb_object=self.CB_modify)
+                self.checkboxfill(mode='active', cb_object=self.CB_active)
+                go_on = False
+        if not go_on:
+            pass
+        elif mode == 'all':
             if employee_name != self.emptystring:
                 first_name, last_name = employee_name.split()
                 emp_state = self.c.execute("SELECT enabled FROM employees WHERE first_name = ? and last_name = ?", (first_name, last_name)).fetchone()[0]
@@ -272,7 +312,6 @@ class MainScreen(QMainWindow, Ui_DesctopMainWindow):
                 self.LE_modify_lastname.setText("")
                 self.CHB_active.setChecked(False)
         elif mode =='active':
-            employee_name = cb_object.currentText()
             # only executes the code when the combobox is not empty
             if employee_name != self.emptystring:
                 first_name, last_name = employee_name.split()
