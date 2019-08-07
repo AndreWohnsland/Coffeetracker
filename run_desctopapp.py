@@ -22,8 +22,9 @@ class MainScreen(QMainWindow, Ui_DesctopMainWindow):
     """Creates the desctop application for the controlling in the desctop
     Currently uses most function out of the Pi programm, since the logic is similar.
     It is planned to connect via remote access to the DB and get all the data.
+    Needs a path to the DB.
     """
-    def __init__(self, parent=None, db_path=None):
+    def __init__(self, parent=None, db_path=None, quantname="Coffee", quantcosts=0.25):
         """ Init function for the MainWindow Class. """
         super(MainScreen, self).__init__(parent)
         self.setupUi(self)
@@ -48,18 +49,27 @@ class MainScreen(QMainWindow, Ui_DesctopMainWindow):
         self.employee_name = ""
         self.employee_id = 0
         self.emptystring = " -- select employee -- "
+        self.quantcosts = quantcosts
+        self.quantname = quantname
 
         # Connects all the CB
-        self.CB_active.activated.connect(lambda: self.checkboxchange(mode='active', cb_object=self.CB_active))
-        self.CB_modify.activated.connect(lambda: self.checkboxchange(mode='all', cb_object=self.CB_modify))
+        self.CB_active.activated.connect(lambda: self.comboboxchange(mode='active', cb_object=self.CB_active))
+        self.CB_modify.activated.connect(lambda: self.comboboxchange(mode='all', cb_object=self.CB_modify))
 
         # Connect all the Buttons
         self.PB_new.clicked.connect(lambda: self.add_employee(self.LE_firstname, self.LE_lastname))
         self.PB_default.clicked.connect(self.set_config)
         self.PB_pay.clicked.connect(self.pay_clicked)
-        self.PB_plot_active.clicked.connect(lambda: self.plot_clicked(active=True))
-        self.PB_plot_lifetime.clicked.connect(lambda: self.plot_clicked(active=False))
+        self.PB_add_coffee.clicked.connect(self.add_coffee)
+        self.PB_undo.clicked.connect(self.undo_last)
+        self.PB_plot.clicked.connect(self.plot_clicked)
         self.PB_change.clicked.connect(lambda: self.add_employee(self.LE_modify_firstname, self.LE_modify_lastname, update=True, checkbox_object=self.CHB_active, combobox_object=self.CB_modify))
+
+        # Connects the menu
+        self.actionTodo.triggered.connect(self.action_what)
+        self.actionAbout.triggered.connect(self.action_about)
+        self.actionExit.triggered.connect(self.action_exit)
+        self.actionCofigure_con.triggered.connect(self.action_configure)
 
         # restrictions for the Lineedits
         max_char_len = 20
@@ -76,20 +86,20 @@ class MainScreen(QMainWindow, Ui_DesctopMainWindow):
         self.LE_payment.textChanged.connect(lambda: self.lineedit_changed_number(self.LE_payment))
 
         # assign the nececary values to the CB
-        self.checkboxfill(mode='active', cb_object=self.CB_active)
-        self.checkboxfill(cb_object=self.CB_modify)
+        self.comboboxfill(mode='active', cb_object=self.CB_active)
+        self.comboboxfill(cb_object=self.CB_modify)
 
         # gets the default entry for the CB
-        if self.default_empid != 0:
-            naming = self.c.execute("SELECT first_name, last_name FROM employees WHERE ID = ?", (self.default_empid,)).fetchone()
-            if naming is not None:
-                search_cb = " ".join((naming[0], naming[1]))
-                index = self.CB_active.findText(search_cb, Qt.MatchFixedString)
-                self.CB_active.setCurrentIndex(index)
-        self.checkboxchange(mode='active', cb_object=self.CB_active)
+        self.set_default()
 
     def lineedit_changed_number(self, le_object, max_decimals=2, max_text_length=2):
-        """ Method to limit the lineedits entry to a set length/decimals"""
+        """Method to limit the lineedits entry to a set length/decimals
+        
+        Args:
+            le_object (qt_object): Lineedit connected to that function
+            max_decimals (int, optional): Number of decimals. Defaults to 2.
+            max_text_length (int, optional): Amount of number before the dot (2 for max 99.). Defaults to 2.
+        """
         le_text = le_object.text()
         # only works on numbers not some chars
         if le_text != "":
@@ -124,13 +134,15 @@ class MainScreen(QMainWindow, Ui_DesctopMainWindow):
     def set_config(self):
         """ Changes the default config settings to the selected user. """
         config = configparser.ConfigParser()
-        config['employee'] = {
-            'firstname': f'{self.employee_first_name}',
-            'lastname': f'{self.employee_last_name}',
-            'empid': f'{self.employee_id}'
-            }
+        config.read('desctop_ui/employeeconfig.ini')
+        config['employee']['firstname'] = f'{self.employee_first_name}'
+        config['employee']['lastname'] = f'{self.employee_last_name}'
+        config['employee']['empid'] = f'{self.employee_id}'
         with open('desctop_ui/employeeconfig.ini', 'w') as configfile:
             config.write(configfile)
+        self.default_firstname = self.employee_first_name
+        self.default_lastname = self.employee_last_name
+        self.default_empid = self.employee_id
         standartbox(f"The User {self.employee_first_name} {self.employee_last_name} was set as default.", parent=self)
 
     def pay_clicked(self):
@@ -156,6 +168,52 @@ class MainScreen(QMainWindow, Ui_DesctopMainWindow):
             self.DB.commit()
             self.LE_payment.setText("")
             standartbox("Your payment has been entered!", parent=self)
+            self.update_money_shown(new_money)
+
+    def add_coffee(self):
+        """ Adds one quantity to the employee. """
+        # if there is an employee selected, gets the first and the last name and search into the db, insert the values
+        enter_quant = False
+        if self.employee_first_name == "":
+            # if the user didnt select a name it will fail.
+            standartbox("Please select a name!", parent=self)
+        else:
+            box_first_name = str(self.CB_active.currentText()).split()[0]
+            user_return = standartbox(f"Enter a {self.quantname} to user {box_first_name}?", boxtype="okcancel", okstring="Yes", cancelstring="No", parent=self)
+            # if the user return is ok (value 1024 in qt) then set the variable to carry on
+            if user_return == 1024:
+                enter_quant = True
+        if enter_quant:
+            # split the cb (since it displays first and lastname as onne)
+            exist_employee = self.c.execute("SELECT COUNT(*) FROM employees WHERE ID = ?", (self.employee_id,)).fetchone()[0]
+            if exist_employee:
+                # also gets the time to insert into the tracking table, updates the label and checks if the user exceeded the critical amount of debts
+                time_now = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+                self.c.execute("UPDATE OR IGNORE employees SET amount = amount + 1, money = money - ? WHERE ID = ?", (self.quantcosts, self.employee_id))
+                self.c.execute("INSERT OR IGNORE INTO tracks(employee_ID, time) VALUES(?, ?)", (self.employee_id, time_now))
+                self.DB.commit()
+                money = self.c.execute("SELECT money FROM employees WHERE ID = ?",(self.employee_id,)).fetchone()[0]
+                self.update_money_shown(money)
+            else:
+                # this should never happen
+                standartbox("Ough! Somehow the employee doesn't exist in the Database!", parent=self)
+
+    def undo_last(self):
+        """ Undo the last quantity entry. It just removes one time payment and amount from the list """
+        # asks the user if he wants to remove his last entry, if so, carries on in the process
+        # needs also to check that a employee is selected
+        if self.CB_active != self.emptystring:
+            user_return = standartbox(f"Remove the last entry for {self.employee_first_name} {self.employee_last_name}?", boxtype="okcancel", okstring="Yes", cancelstring="No", parent=self)
+        else:
+            user_return = 0
+        if user_return == 1024:
+            current_money = self.c.execute("SELECT money FROM employees WHERE ID = ?",(self.employee_id,)).fetchone()[0]
+            new_money = current_money + self.quantcosts
+            self.c.execute("UPDATE OR IGNORE employees SET money = ?, amount = amount - 1 WHERE ID = ?",(new_money, self.employee_id))
+            # deletes the last entry of the employee in the tracking list
+            self.c.execute("DELETE FROM tracks WHERE Number=(SELECT max(Number) FROM tracks WHERE employee_ID=?)",(self.employee_id,))
+            self.DB.commit()
+            # sets the label according to the credit
             self.update_money_shown(new_money)
 
     def add_employee(self, first_name_object, last_name_object, update=False, emp_id=None, checkbox_object=None, combobox_object=None):
@@ -201,37 +259,35 @@ class MainScreen(QMainWindow, Ui_DesctopMainWindow):
                     enabled = 1
                 else:
                     enabled = 0
-                emp_id = self.c.execute("SELECT ID FROM employees WHERE first_name=? AND last_name=?",(first_name, last_name)).fetchone()
-                # if at the same time a user changes the entry, the search by name will not be successfull
-                # for the future (if its possible) also assign the id to the DD and catch it with the id!
-                if emp_id is None:
-                    standartbox("Failed to get the old employee name, seems like someone just changed it, reloading dropdown... try again.", parent=self)
-                    self.checkboxfill(mode='all', cb_object=self.CB_modify)
-                else:
-                    emp_id = emp_id[0]
-                    self.c.execute("UPDATE OR IGNORE employees SET first_name=?, last_name=?, enabled=? WHERE ID=?",(first_name, last_name, enabled, emp_id))
-                    self.DB.commit()
-                    # clears an repopulates the CB // alternative here code to just replace or call to the function
-                    self.checkboxfill(mode='all', cb_object=self.CB_modify)
-                    self.checkboxfill(mode='active', cb_object=self.CB_active)
-                    # resets all the other Ui elements
-                    self.L_debts.setText("Balance:")
-                    self.L_debts.setStyleSheet('color: rgb(0,0,0)')
-                    first_name_object.clear()
-                    last_name_object.clear()
-                    self.CHB_active.setChecked(False)
-                    standartbox(f"Employee {first_name} {last_name} was updated!", parent=self)
-                    return True
+                emp_id = self.CB_modify.currentData()
+                self.c.execute("UPDATE OR IGNORE employees SET first_name=?, last_name=?, enabled=? WHERE ID=?",(first_name, last_name, enabled, emp_id))
+                self.DB.commit()
+                # clears an repopulates the CB // alternative here code to just replace or call to the function
+                self.comboboxfill(mode='all', cb_object=self.CB_modify)
+                self.comboboxfill(mode='active', cb_object=self.CB_active)
+                # resets all the other Ui elements
+                self.L_debts.setText("Balance:")
+                self.L_debts.setStyleSheet('color: rgb(0,0,0)')
+                self.set_default()
+                first_name_object.clear()
+                last_name_object.clear()
+                self.CHB_active.setChecked(False)
+                standartbox(f"Employee {first_name} {last_name} was updated!", parent=self)
+                return True
             else:
                 standartbox("This employee already exists!", parent=self)
         return False
     
     def plot_clicked(self, active=True):
-        """ Plot a leaderboard of the best x employees. By best is ment the most entries. 
+        """Plot a leaderboard of the best x employees. By best is ment the most entries. 
         Differentiates between all DB entries, and only still active employees.
+        
+        Args:
+            active (bool, optional): Decidor for only active employees or all. Defaults to True.
         """
         # Selects the 5 employes with the highest comsumption either from all ore active
-        if active:
+        user_return = standartbox("Select only active employees or all ever existing ones?", boxtype="okcancel", okstring="active", cancelstring="all", parent=self)
+        if user_return == 1024:
             bonusstring = " WHERE enabled=1"
             headerstring="(active)"
         else:
@@ -253,7 +309,7 @@ class MainScreen(QMainWindow, Ui_DesctopMainWindow):
         self.graphwindow = GraphWindow(self, plotvalues=amountlist[::-1], plotlabels=namelist[::-1], headerstring=headerstring)
         self.graphwindow.show()
 
-    def checkboxfill(self, mode='all', cb_object=None):     
+    def comboboxfill(self, mode='all', cb_object=None):     
         """Refills the Comboboxes, either all names or just active ones.    
         
         Args:
@@ -268,13 +324,13 @@ class MainScreen(QMainWindow, Ui_DesctopMainWindow):
             sql_bonus = "WHERE enabled = 1 "
         else:
             raise ValueError("The mode have to be all or active!")
-        sqlstring = f"SELECT first_name, last_name from employees {sql_bonus}ORDER BY last_name ASC"
+        sqlstring = f"SELECT first_name, last_name, ID from employees {sql_bonus}ORDER BY last_name ASC"
         cb_object.clear()
-        cb_object.addItem(self.emptystring)
+        cb_object.addItem(self.emptystring, 0)
         for employee in self.c.execute(sqlstring):
-            cb_object.addItem(" ".join((employee[0], employee[1])))
+            cb_object.addItem(" ".join((employee[0], employee[1])), employee[2])
 
-    def checkboxchange(self, mode='all', cb_object=None):
+    def comboboxchange(self, mode='all', cb_object=None):
         """Fils the Lineedits, and write the values to them    
         
         Args:
@@ -287,13 +343,14 @@ class MainScreen(QMainWindow, Ui_DesctopMainWindow):
         # still needs to investigate if cb can have multiple values (shown and intern values) then set intern to id and shown to name!
         go_on = True
         employee_name = cb_object.currentText()
+        employee_id = cb_object.currentData()
         if employee_name != self.emptystring:
             first_name, last_name = cb_object.currentText().split()
             emp_id = self.c.execute("SELECT ID FROM employees WHERE first_name=? AND last_name=?",(first_name, last_name)).fetchone()
             if emp_id is None:
                 standartbox("Failed to get the old employee name, seems like someone just changed it, reloading dropdown... try again.", parent=self)
-                self.checkboxfill(mode='all', cb_object=self.CB_modify)
-                self.checkboxfill(mode='active', cb_object=self.CB_active)
+                self.comboboxfill(mode='all', cb_object=self.CB_modify)
+                self.comboboxfill(mode='active', cb_object=self.CB_active)
                 go_on = False
         if not go_on:
             pass
@@ -334,9 +391,12 @@ class MainScreen(QMainWindow, Ui_DesctopMainWindow):
         else:
             raise ValueError("The mode have to be all or active!")
 
-
     def update_money_shown(self, money):
-        """Updates the label in the mainscreen which shows the money."""
+        """Updates the label in the mainscreen which shows the money.
+        
+        Args:
+            money (float): Value for the Balance.
+        """
         # sets the label according to the credit
         prefix = ""
         if money < 0:
@@ -346,6 +406,34 @@ class MainScreen(QMainWindow, Ui_DesctopMainWindow):
             prefix = "+"
             self.L_debts.setStyleSheet('color: rgb(34,139,34)')
         self.L_debts.setText(f"Balance:  {prefix} {abs(money):.2f} €")
+
+    def set_default(self):
+        """ Updates the combobox to the default user"""
+        if self.default_empid != 0:
+            naming = self.c.execute("SELECT first_name, last_name FROM employees WHERE ID = ?", (self.default_empid,)).fetchone()
+            if naming is not None:
+                search_cb = " ".join((naming[0], naming[1]))
+                index = self.CB_active.findText(search_cb, Qt.MatchFixedString)
+                self.CB_active.setCurrentIndex(index)
+        self.comboboxchange(mode='active', cb_object=self.CB_active)
+
+    def action_what(self):
+        """ Short info message for the user what to do. """
+        print("What to do")
+
+    def action_about(self):
+        """ Short info message about this application. """
+        print("About this app")
+
+    def action_exit(self):
+        """ Close action for the bar. """
+        self.close()
+
+    def action_configure(self):
+        """ Generation for the Configuration. Guides the user through the configuration.
+        Also gets called if the app starts the first time (the config.ini holds this information)
+        """
+        print("Database configuration")
 
 class GraphWindow(QDialog):
     """
@@ -357,6 +445,7 @@ class GraphWindow(QDialog):
         -- headerstring: Depreciated, renames the window titel, is not shown anymore in fullscreen
     """
     def __init__(self, parent, plotvalues=None, plotlabels=None, headerstring="all time"):
+        """ Generates the window and plots the diagram. """
         super(GraphWindow, self).__init__(parent)
         self.setAttribute(Qt.WA_DeleteOnClose)
         self.resize(800, 600)
@@ -461,7 +550,7 @@ def standartbox(textstring, boxtype="standard", okstring="OK", cancelstring="Can
 db_name = "employees_dummy"    
 paymentcall_threshold = 10      # When the pay message got displayed (critical is 1.5 that value)
 quantcosts = 0.25               # cost of one quant (can also be 0)
-quantname = "coffee"            # name of your quants
+quantname = "Coffee"            # name of your quants
 
 # path gerneration for the DB
 subfoldername = "data"
@@ -472,7 +561,7 @@ if __name__ == "__main__":
     # creates the application
     app = QApplication(sys.argv)
     #creates the mainscreen, sets it to fixed size and fullscreen
-    w = MainScreen(db_path=db_path)
+    w = MainScreen(db_path=db_path, quantname=quantname, quantcosts=quantcosts)
     w.show()
     # runs the app until the exit
     sys.exit(app.exec_())
