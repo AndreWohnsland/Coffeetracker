@@ -2,12 +2,11 @@
 
 # Form implementation generated from reading ui file 'desctopdialog.ui'
 #
-# Created by: PyQt5 UI code generator 5.12.2
+# Created by: PyQt5 UI code generator 5.10
 #
 # WARNING! All changes made in this file will be lost!
 
 from PyQt5 import QtCore, QtGui, QtWidgets
-
 
 class Ui_DesctopMainWindow(object):
     def setupUi(self, DesctopMainWindow):
@@ -31,6 +30,7 @@ class Ui_DesctopMainWindow(object):
         self.label_7.setObjectName("label_7")
         self.verticalLayout_5.addWidget(self.label_7)
         self.CB_modify = QtWidgets.QComboBox(self.centralwidget)
+        self.CB_modify.setInsertPolicy(QtWidgets.QComboBox.InsertAlphabetically)
         self.CB_modify.setObjectName("CB_modify")
         self.verticalLayout_5.addWidget(self.CB_modify)
         self.LE_modify_firstname = QtWidgets.QLineEdit(self.centralwidget)
@@ -115,6 +115,7 @@ class Ui_DesctopMainWindow(object):
         self.verticalLayout_3.addWidget(self.label)
         self.CB_active = QtWidgets.QComboBox(self.centralwidget)
         self.CB_active.setMaximumSize(QtCore.QSize(16777215, 50))
+        self.CB_active.setInsertPolicy(QtWidgets.QComboBox.InsertAlphabetically)
         self.CB_active.setObjectName("CB_active")
         self.verticalLayout_3.addWidget(self.CB_active)
         self.L_debts = QtWidgets.QLabel(self.centralwidget)
@@ -286,8 +287,6 @@ class Ui_DesctopMainWindow(object):
         self.actionCofigure_con.setShortcut(_translate("DesctopMainWindow", "Ctrl+D, Ctrl+B"))
 
 
-
-
 if __name__ == "__main__":
     import sys
     app = QtWidgets.QApplication(sys.argv)
@@ -296,3 +295,4 @@ if __name__ == "__main__":
     ui.setupUi(DesctopMainWindow)
     DesctopMainWindow.show()
     sys.exit(app.exec_())
+

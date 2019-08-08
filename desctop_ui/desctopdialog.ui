@@ -42,7 +42,11 @@
        </widget>
       </item>
       <item>
-       <widget class="QComboBox" name="CB_modify"/>
+       <widget class="QComboBox" name="CB_modify">
+        <property name="insertPolicy">
+         <enum>QComboBox::InsertAlphabetically</enum>
+        </property>
+       </widget>
       </item>
       <item>
        <widget class="QLineEdit" name="LE_modify_firstname">
@@ -275,6 +279,9 @@
           <width>16777215</width>
           <height>50</height>
          </size>
+        </property>
+        <property name="insertPolicy">
+         <enum>QComboBox::InsertAlphabetically</enum>
         </property>
        </widget>
       </item>

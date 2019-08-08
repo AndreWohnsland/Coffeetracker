@@ -31,10 +31,8 @@ class MainScreen(QMainWindow, Ui_DesctopMainWindow):
         super(MainScreen, self).__init__(parent)
         self.setupUi(self)
 
-        # Connects to the DB and the configs
-        if db_path is not None:
-            self.DB = sqlite3.connect(db_path)
-            self.c = self.DB.cursor()
+        # Gets the DB path and the configs
+        self.db_path = db_path
         config = configparser.ConfigParser()
         self.employeeconfig_path = 'employeeconfig.ini'
         config.read(self.employeeconfig_path)
@@ -173,9 +171,8 @@ class MainScreen(QMainWindow, Ui_DesctopMainWindow):
                 enter_credit = True
         # finally enters the data into the db and deletes the entry LE/ updates the label
         if enter_credit:
-            self.c.execute("UPDATE OR IGNORE employees SET money = money + ? WHERE ID = ?",(pay_amount, self.employee_id))
-            new_money = self.c.execute("SELECT money FROM employees WHERE ID = ?",(self.employee_id,)).fetchone()[0]
-            self.DB.commit()
+            self.queryDB("UPDATE OR IGNORE employees SET money = money + ? WHERE ID = ?",(pay_amount, self.employee_id))
+            new_money = self.queryDB("SELECT money FROM employees WHERE ID = ?",(self.employee_id,)).fetchone()[0]
             self.LE_payment.setText("")
             standartbox("Your payment has been entered!", parent=self)
             self.update_money_shown(new_money)
@@ -195,14 +192,13 @@ class MainScreen(QMainWindow, Ui_DesctopMainWindow):
                 enter_quant = True
         if enter_quant:
             # split the cb (since it displays first and lastname as onne)
-            exist_employee = self.c.execute("SELECT COUNT(*) FROM employees WHERE ID = ?", (self.employee_id,)).fetchone()[0]
+            exist_employee = self.queryDB("SELECT COUNT(*) FROM employees WHERE ID = ?", (self.employee_id,)).fetchone()[0]
             if exist_employee:
                 # also gets the time to insert into the tracking table, updates the label and checks if the user exceeded the critical amount of debts
                 time_now = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-                self.c.execute("UPDATE OR IGNORE employees SET amount = amount + 1, money = money - ? WHERE ID = ?", (self.quantcosts, self.employee_id))
-                self.c.execute("INSERT OR IGNORE INTO tracks(employee_ID, time) VALUES(?, ?)", (self.employee_id, time_now))
-                self.DB.commit()
-                money = self.c.execute("SELECT money FROM employees WHERE ID = ?",(self.employee_id,)).fetchone()[0]
+                self.queryDB("UPDATE OR IGNORE employees SET amount = amount + 1, money = money - ? WHERE ID = ?", (self.quantcosts, self.employee_id))
+                self.queryDB("INSERT OR IGNORE INTO tracks(employee_ID, time) VALUES(?, ?)", (self.employee_id, time_now))
+                money = self.queryDB("SELECT money FROM employees WHERE ID = ?",(self.employee_id,)).fetchone()[0]
                 self.update_money_shown(money)
             else:
                 # this should never happen
@@ -217,12 +213,11 @@ class MainScreen(QMainWindow, Ui_DesctopMainWindow):
         else:
             user_return = 0
         if user_return == 1024:
-            current_money = self.c.execute("SELECT money FROM employees WHERE ID = ?",(self.employee_id,)).fetchone()[0]
+            current_money = self.queryDB("SELECT money FROM employees WHERE ID = ?",(self.employee_id,)).fetchone()[0]
             new_money = current_money + self.quantcosts
-            self.c.execute("UPDATE OR IGNORE employees SET money = ?, amount = amount - 1 WHERE ID = ?",(new_money, self.employee_id))
+            self.queryDB("UPDATE OR IGNORE employees SET money = ?, amount = amount - 1 WHERE ID = ?",(new_money, self.employee_id))
             # deletes the last entry of the employee in the tracking list
-            self.c.execute("DELETE FROM tracks WHERE Number=(SELECT max(Number) FROM tracks WHERE employee_ID=?)",(self.employee_id,))
-            self.DB.commit()
+            self.queryDB("DELETE FROM tracks WHERE Number=(SELECT max(Number) FROM tracks WHERE employee_ID=?)",(self.employee_id,))
             # sets the label according to the credit
             self.update_money_shown(new_money)
 
@@ -253,26 +248,21 @@ class MainScreen(QMainWindow, Ui_DesctopMainWindow):
             standartbox("The names need at least three character!", parent=self)
         else:
             # checks if already exists, else enter into the DB and updates the Comboboxes/sorts them
-            name_exists = self.c.execute("SELECT COUNT(*) FROM employees WHERE first_name = ? AND last_name = ?",(first_name, last_name)).fetchone()[0]
+            name_exists = self.queryDB("SELECT COUNT(*) FROM employees WHERE first_name = ? AND last_name = ?",(first_name, last_name)).fetchone()[0]
             if not name_exists and not update:
-                self.c.execute("INSERT OR IGNORE INTO employees(first_name, last_name, amount, money, enabled) VALUES(?,?,0,0,1)",(first_name, last_name))
-                self.DB.commit()
+                self.queryDB("INSERT OR IGNORE INTO employees(first_name, last_name, amount, money, enabled) VALUES(?,?,0,0,1)",(first_name, last_name))
                 first_name_object.clear()
                 last_name_object.clear()
-                new_id = self.c.execute("SELECT ID FROM employees WHERE first_name = ? AND last_name = ?",(first_name, last_name)).fetchone()[0]
                 standartbox(f"Employee {first_name} {last_name} was generated!", parent=self)
-                self.CB_active.addItem(" ".join((first_name, last_name)), new_id)
-                self.CB_active.model().sort(0)
-                self.CB_modify.addItem(" ".join((first_name, last_name)), new_id)
-                self.CB_active.model().sort(0)
+                self.comboboxfill(mode='all', cb_object=self.CB_modify)
+                self.comboboxfill(mode='active', cb_object=self.CB_active)
             elif update:
                 if checkbox_object.isChecked():
                     enabled = 1
                 else:
                     enabled = 0
                 emp_id = self.CB_modify.currentData()
-                self.c.execute("UPDATE OR IGNORE employees SET first_name=?, last_name=?, enabled=? WHERE ID=?",(first_name, last_name, enabled, emp_id))
-                self.DB.commit()
+                self.queryDB("UPDATE OR IGNORE employees SET first_name=?, last_name=?, enabled=? WHERE ID=?",(first_name, last_name, enabled, emp_id))
                 # clears an repopulates the CB // alternative here code to just replace or call to the function
                 self.comboboxfill(mode='all', cb_object=self.CB_modify)
                 self.comboboxfill(mode='active', cb_object=self.CB_active)
@@ -304,7 +294,7 @@ class MainScreen(QMainWindow, Ui_DesctopMainWindow):
         else:
             bonusstring = ""
             headerstring="(all time)"
-        employee_data = self.c.execute(f"SELECT first_name, last_name, amount FROM employees{bonusstring} ORDER BY amount DESC LIMIT 5")
+        employee_data = self.queryDB(f"SELECT first_name, last_name, amount FROM employees{bonusstring} ORDER BY amount DESC LIMIT 5")
         namelist = []
         amountlist =  []
         # generates a list of the employees and values for later plotting, only picks up the five highest
@@ -339,7 +329,7 @@ class MainScreen(QMainWindow, Ui_DesctopMainWindow):
         cb_object.clear()
         cb_object.addItem(self.emptystring, 0)
         # adds all selected employees, as well as their id to the CB
-        for employee in self.c.execute(sqlstring):
+        for employee in self.queryDB(sqlstring):
             cb_object.addItem(" ".join((employee[0], employee[1])), employee[2])
 
     def comboboxchange(self, mode='all', cb_object=None):
@@ -359,7 +349,7 @@ class MainScreen(QMainWindow, Ui_DesctopMainWindow):
         # only carries out if there is a selection
         if employee_name != self.emptystring:
             first_name, last_name = cb_object.currentText().split()
-            emp_id = self.c.execute("SELECT ID FROM employees WHERE first_name=? AND last_name=?",(first_name, last_name)).fetchone()
+            emp_id = self.queryDB("SELECT ID FROM employees WHERE first_name=? AND last_name=?",(first_name, last_name)).fetchone()
             # in any case of not getting the id refreshes the boxes and informs the user
             if emp_id is None:
                 standartbox("Failed to get the old employee name, seems like someone just changed it, reloading dropdown... try again.", parent=self)
@@ -372,7 +362,7 @@ class MainScreen(QMainWindow, Ui_DesctopMainWindow):
             if employee_name != self.emptystring:
                 # gets the enabloed status and the names for the Master dialog
                 first_name, last_name = employee_name.split()
-                emp_state = self.c.execute("SELECT enabled FROM employees WHERE first_name = ? and last_name = ?", (first_name, last_name)).fetchone()[0]
+                emp_state = self.queryDB("SELECT enabled FROM employees WHERE first_name = ? and last_name = ?", (first_name, last_name)).fetchone()[0]
                 self.LE_modify_firstname.setText(first_name)
                 self.LE_modify_lastname.setText(last_name)
                 if emp_state:
@@ -388,7 +378,7 @@ class MainScreen(QMainWindow, Ui_DesctopMainWindow):
             if employee_name != self.emptystring:
                 # Updates the Label and the Class properties
                 first_name, last_name = employee_name.split()
-                money, employee_id = self.c.execute("SELECT money, ID FROM employees WHERE first_name = ? and last_name = ?", (first_name, last_name)).fetchone()[0:2]
+                money, employee_id = self.queryDB("SELECT money, ID FROM employees WHERE first_name = ? and last_name = ?", (first_name, last_name)).fetchone()[0:2]
                 # sets the label according to the credit
                 self.update_money_shown(money)
                 # updates the attributes of our class object (employee properties)
@@ -426,12 +416,44 @@ class MainScreen(QMainWindow, Ui_DesctopMainWindow):
     def set_default(self):
         """ Updates the combobox to the default user"""
         if self.default_empid != 0:
-            naming = self.c.execute("SELECT first_name, last_name FROM employees WHERE ID = ?", (self.default_empid,)).fetchone()
+            naming = self.queryDB("SELECT first_name, last_name FROM employees WHERE ID = ?", (self.default_empid,)).fetchone()
             if naming is not None:
                 search_cb = " ".join((naming[0], naming[1]))
                 index = self.CB_active.findText(search_cb, Qt.MatchFixedString)
                 self.CB_active.setCurrentIndex(index)
         self.comboboxchange(mode='active', cb_object=self.CB_active)
+
+    def get_database(self):
+        pass
+
+    def put_database(self):
+        pass
+
+    def connDB(self):
+        """Connect to the database and generates a cursor
+        """
+        self.DB = sqlite3.connect(self.db_path)
+        self.c = self.DB.cursor()
+
+    def queryDB(self, sql, serachtuple=()):
+        """Executes the sql querry, closes the connection afterwards.
+        
+        Args:
+            sql (str): Sql String to execute
+            serachtuple (tuple): Aditional arguments to search for
+        
+        Returns:
+            cursor: Data (tuple or None) if a select statement was chosen
+        """
+        self.connDB()
+        self.c.execute(sql, serachtuple)
+
+        if sql[0:6].lower() == 'select':
+            result = self.c
+            return result
+        else:
+            self.DB.commit()
+        self.DB.close()
 
     def action_what(self):
         """ Short info message for the user what to do. """
@@ -655,6 +677,7 @@ def get_properties(src_path, optionalpath=None):
     # here os.path.isfile should be the key function to establish the connection check!
     # also consult https://stackoverflow.com/questions/12932607/how-to-check-if-a-sqlite3-database-exists-in-python for further information
     # or https://www.guru99.com/python-check-if-file-exists.html
+    # for me: this will probably not take place here, but mostly in the other method in the mainclass. get and put of the db b4 and after sql inserts
     elif master_location == 'pi':
         path_pi_data = 'home/pi/Coffeetracker/data'
         print(path_pi_data)
