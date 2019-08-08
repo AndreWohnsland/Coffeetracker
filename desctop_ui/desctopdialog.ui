@@ -350,7 +350,7 @@
          </font>
         </property>
         <property name="text">
-         <string>Payment and Plots</string>
+         <string>Payment, Coffee and Plots</string>
         </property>
        </widget>
       </item>
@@ -432,32 +432,61 @@
        </widget>
       </item>
       <item>
-       <widget class="QPushButton" name="PB_plot_active">
-        <property name="minimumSize">
-         <size>
-          <width>0</width>
-          <height>30</height>
-         </size>
-        </property>
-        <property name="maximumSize">
-         <size>
-          <width>16777215</width>
-          <height>75</height>
-         </size>
-        </property>
-        <property name="font">
-         <font>
-          <weight>75</weight>
-          <bold>true</bold>
-         </font>
-        </property>
-        <property name="text">
-         <string>Plot Leaderboard (active)</string>
-        </property>
-       </widget>
+       <layout class="QHBoxLayout" name="horizontalLayout">
+        <item>
+         <widget class="QPushButton" name="PB_add_coffee">
+          <property name="minimumSize">
+           <size>
+            <width>0</width>
+            <height>30</height>
+           </size>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>16777215</width>
+            <height>75</height>
+           </size>
+          </property>
+          <property name="font">
+           <font>
+            <weight>75</weight>
+            <bold>true</bold>
+           </font>
+          </property>
+          <property name="text">
+           <string>Add Coffee</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="PB_undo">
+          <property name="minimumSize">
+           <size>
+            <width>0</width>
+            <height>30</height>
+           </size>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>16777215</width>
+            <height>75</height>
+           </size>
+          </property>
+          <property name="font">
+           <font>
+            <weight>75</weight>
+            <bold>true</bold>
+           </font>
+          </property>
+          <property name="text">
+           <string>Undo Add</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
       </item>
       <item>
-       <widget class="QPushButton" name="PB_plot_lifetime">
+       <widget class="QPushButton" name="PB_plot">
         <property name="minimumSize">
          <size>
           <width>0</width>
@@ -477,7 +506,7 @@
          </font>
         </property>
         <property name="text">
-         <string>Plot Leaderboard (lifetime)</string>
+         <string>Plot Leaderboard</string>
         </property>
        </widget>
       </item>
@@ -543,26 +572,59 @@
     <property name="title">
      <string>Help</string>
     </property>
-    <addaction name="actionWhat_to_do"/>
+    <addaction name="actionTodo"/>
     <addaction name="actionAbout"/>
     <addaction name="separator"/>
     <addaction name="actionExit"/>
    </widget>
+   <widget class="QMenu" name="menuConfig">
+    <property name="title">
+     <string>Config</string>
+    </property>
+    <addaction name="actionCofigure_con"/>
+   </widget>
    <addaction name="menuHelp"/>
+   <addaction name="menuConfig"/>
   </widget>
-  <action name="actionWhat_to_do">
+  <action name="actionTodo">
    <property name="text">
     <string>What to do?</string>
+   </property>
+   <property name="statusTip">
+    <string>More information on how to use this app</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+H</string>
    </property>
   </action>
   <action name="actionAbout">
    <property name="text">
     <string>About</string>
    </property>
+   <property name="statusTip">
+    <string>Information about this awesome app</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+I</string>
+   </property>
   </action>
   <action name="actionExit">
    <property name="text">
     <string>Exit</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+X</string>
+   </property>
+  </action>
+  <action name="actionCofigure_con">
+   <property name="text">
+    <string>Cofigure Database Connection</string>
+   </property>
+   <property name="statusTip">
+    <string>Set up the connection to the database</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+D, Ctrl+B</string>
    </property>
   </action>
  </widget>
