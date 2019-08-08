@@ -135,15 +135,19 @@ class MainScreen(QMainWindow, Ui_DesctopMainWindow):
             le_object.setText(str(le_value))
 
     def dummy(self):
+        """ Dummy to fill some connection before using them. """
         pass
 
     def set_config(self):
         """ Changes the default config settings to the selected user. """
+        # connects to the user specific config (each user can have different ones)
         config = configparser.ConfigParser()
         config.read(self.employeeconfig_path)
+        # saves name and id into the config
         config['employee']['firstname'] = f'{self.employee_first_name}'
         config['employee']['lastname'] = f'{self.employee_last_name}'
         config['employee']['empid'] = f'{self.employee_id}'
+        # writes the file, update the class properties accordingly
         with open(self.employeeconfig_path, 'w') as configfile:
             config.write(configfile)
         self.default_firstname = self.employee_first_name
@@ -155,7 +159,7 @@ class MainScreen(QMainWindow, Ui_DesctopMainWindow):
         """ First asks the user to proceed then enters the value into db. """
         enter_credit = False
         pay_amount = self.LE_payment.text()
-        # Only carries on if a value is given
+        # Only carries on if a value is given and a employee is selected
         if pay_amount == "":
             standartbox("No value to pay given!", parent=self)
         elif self.employee_id == 0:
@@ -248,17 +252,18 @@ class MainScreen(QMainWindow, Ui_DesctopMainWindow):
         elif len(first_name)<3 or len(last_name)<3:
             standartbox("The names need at least three character!", parent=self)
         else:
-            # checks if already exists, else enter into the DB
+            # checks if already exists, else enter into the DB and updates the Comboboxes/sorts them
             name_exists = self.c.execute("SELECT COUNT(*) FROM employees WHERE first_name = ? AND last_name = ?",(first_name, last_name)).fetchone()[0]
             if not name_exists and not update:
                 self.c.execute("INSERT OR IGNORE INTO employees(first_name, last_name, amount, money, enabled) VALUES(?,?,0,0,1)",(first_name, last_name))
                 self.DB.commit()
                 first_name_object.clear()
                 last_name_object.clear()
+                new_id = self.c.execute("SELECT ID FROM employees WHERE first_name = ? AND last_name = ?",(first_name, last_name)).fetchone()[0]
                 standartbox(f"Employee {first_name} {last_name} was generated!", parent=self)
-                self.CB_active.addItem(" ".join((first_name, last_name)))
+                self.CB_active.addItem(" ".join((first_name, last_name)), new_id)
                 self.CB_active.model().sort(0)
-                self.CB_modify.addItem(" ".join((first_name, last_name)))
+                self.CB_modify.addItem(" ".join((first_name, last_name)), new_id)
                 self.CB_active.model().sort(0)
             elif update:
                 if checkbox_object.isChecked():
@@ -333,6 +338,7 @@ class MainScreen(QMainWindow, Ui_DesctopMainWindow):
         sqlstring = f"SELECT first_name, last_name, ID from employees {sql_bonus}ORDER BY last_name ASC"
         cb_object.clear()
         cb_object.addItem(self.emptystring, 0)
+        # adds all selected employees, as well as their id to the CB
         for employee in self.c.execute(sqlstring):
             cb_object.addItem(" ".join((employee[0], employee[1])), employee[2])
 
@@ -350,9 +356,11 @@ class MainScreen(QMainWindow, Ui_DesctopMainWindow):
         go_on = True
         employee_name = cb_object.currentText()
         employee_id = cb_object.currentData()
+        # only carries out if there is a selection
         if employee_name != self.emptystring:
             first_name, last_name = cb_object.currentText().split()
             emp_id = self.c.execute("SELECT ID FROM employees WHERE first_name=? AND last_name=?",(first_name, last_name)).fetchone()
+            # in any case of not getting the id refreshes the boxes and informs the user
             if emp_id is None:
                 standartbox("Failed to get the old employee name, seems like someone just changed it, reloading dropdown... try again.", parent=self)
                 self.comboboxfill(mode='all', cb_object=self.CB_modify)
@@ -362,6 +370,7 @@ class MainScreen(QMainWindow, Ui_DesctopMainWindow):
             pass
         elif mode == 'all':
             if employee_name != self.emptystring:
+                # gets the enabloed status and the names for the Master dialog
                 first_name, last_name = employee_name.split()
                 emp_state = self.c.execute("SELECT enabled FROM employees WHERE first_name = ? and last_name = ?", (first_name, last_name)).fetchone()[0]
                 self.LE_modify_firstname.setText(first_name)
@@ -377,6 +386,7 @@ class MainScreen(QMainWindow, Ui_DesctopMainWindow):
         elif mode =='active':
             # only executes the code when the combobox is not empty
             if employee_name != self.emptystring:
+                # Updates the Label and the Class properties
                 first_name, last_name = employee_name.split()
                 money, employee_id = self.c.execute("SELECT money, ID FROM employees WHERE first_name = ? and last_name = ?", (first_name, last_name)).fetchone()[0:2]
                 # sets the label according to the credit
@@ -547,15 +557,18 @@ class ConfigDialog(QDialog, Ui_ConfigDialog):
         self.PB_cancel.clicked.connect(lambda: self.close())
 
     def change_config(self):
-        """ Evaluates the data and if everythin is okay enters it into the """
+        """ Evaluates the data and if everything is okay enters it into the """
+        # first checks if its the pi, that everythin is given
         if self.RB_pi.isChecked() and (self.LE_ip.text()=="" or self.LE_name.text()=="" or self.LE_password.text()==""):
             standartbox("At least one entry for the pi is missing", parent=self)
         elif self.RB_pi.isChecked():
             print("Check if the data is valid or not")
+        # if no errors, go on
         else:
             config = configparser.ConfigParser()
             user_path = self.employeeconfig_path
             config.read(user_path)
+            # checks if the pi or local and own or dummy data, saves the information
             if self.RB_pi.isChecked():
                 config['program']['db_location'] = 'pi'
             else:
@@ -564,6 +577,7 @@ class ConfigDialog(QDialog, Ui_ConfigDialog):
                 config['program']['db_type'] = 'own'
             else:
                 config['program']['db_type'] = 'dummy'
+            # finally writes all the information
             with open(user_path, 'w') as configfile:
                 config.write(configfile)
             standartbox("The config was changed ... closing the program ... please start again.", parent=self)
@@ -640,6 +654,7 @@ def get_properties(src_path, optionalpath=None):
     # if the db is remote on the pi, evaluates if the dummy db or the regular DB shall be used. (dummy is for demo use only)
     # here os.path.isfile should be the key function to establish the connection check!
     # also consult https://stackoverflow.com/questions/12932607/how-to-check-if-a-sqlite3-database-exists-in-python for further information
+    # or https://www.guru99.com/python-check-if-file-exists.html
     elif master_location == 'pi':
         path_pi_data = 'home/pi/Coffeetracker/data'
         print(path_pi_data)
