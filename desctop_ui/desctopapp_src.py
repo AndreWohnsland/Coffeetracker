@@ -39,10 +39,6 @@ class MainScreen(QMainWindow, Ui_DesctopMainWindow):
         self.default_lastname = config['employee']['lastname']
         self.default_empid = int(config['employee']['empid'])
         
-        # some optical properties 
-        self.setWindowIcon(QIcon('desctop_ui/coffee.png'))
-        self.L_debts.setStyleSheet('color: rgb(0,0,0)')
-        
         # Generates nececary variables
         self.employee_first_name = ""
         self.employee_last_name = ""
@@ -51,6 +47,13 @@ class MainScreen(QMainWindow, Ui_DesctopMainWindow):
         self.emptystring = " -- select employee -- "
         self.quantcosts = quantcosts
         self.quantname = quantname
+
+        # some optical properties 
+        self.setWindowIcon(QIcon('desctop_ui/coffee.png'))
+        self.L_debts.setStyleSheet('color: rgb(0,0,0)')
+        self.PB_add_coffee.setText(f"Add {self.quantname}")
+        self.label_8.setText(f"Payment, {self.quantname.capitalize()} and Plots")
+        self.label_5.setText(f"Add {self.quantname}, pay debts\nor just plot stuff for fun")
 
         # Connects all the CB
         self.CB_active.activated.connect(lambda: self.comboboxchange(mode='active', cb_object=self.CB_active))
@@ -419,11 +422,11 @@ class MainScreen(QMainWindow, Ui_DesctopMainWindow):
 
     def action_what(self):
         """ Short info message for the user what to do. """
-        print("What to do")
+        standartbox(f"This app is all about managing {self.quantname}! You can add a quantity, pay your debts, plot the user with the most or add/change users.")
 
     def action_about(self):
         """ Short info message about this application. """
-        print("About this app")
+        standartbox("This app was programmed by Andre Wohnsland. For further information see: https://github.com/AndreWohnsland/Coffeetracker.")
 
     def action_exit(self):
         """ Close action for the bar. """
@@ -546,3 +549,31 @@ def standartbox(textstring, boxtype="standard", okstring="OK", cancelstring="Can
     if boxtype == "okcancel":
         # print("value of pressed message box button:", retval)
         return retval
+
+def get_properties(src_path):
+    """Reads the single properties for the quantities and the propramm out of the according .ini files.
+    Later also a synchronisation from the machine properties is planned.
+    
+    Args:
+        src_path (str): Path to the runme python file
+    
+    Returns:
+        tuple: tuple of properties: Database path, threshold value, quantcosts, quantname, error during handling the process
+    """
+    # reads the user definited configs
+    handling_error = False
+    config_user = configparser.ConfigParser()
+    config_user.read(os.path.join(src_path, "desctop_ui", "employeeconfig.ini"))
+    # checks where the db is located, and if it is already a path to the db
+    if config_user['program']['db_location'] == 'local':
+        ret_db_path = os.path.join(src_path, "data", "employees_dummy.db")
+    elif config_user['program']['db_location'] == 'pi':
+        print("getting the db from the pi, trying to get connection, if it fails (Pi is down), shut down the programm/do some other actions")
+    with open(os.path.join(src_path, "desctop_ui", "employeeconfig.ini"), 'w') as configfile:
+        config_user.write(configfile)
+    config_quant = configparser.ConfigParser()
+    config_quant.read(os.path.join(src_path, "desctop_ui", "quantconfig.ini"))
+    threshold = float(config_quant['properties']['paymentcall_threshold'])
+    quantcosts = float(config_quant['properties']['quantcosts'])
+    quantname = str(config_quant['properties']['quantname']).replace('"','')
+    return (ret_db_path, threshold, quantcosts, quantname, handling_error)

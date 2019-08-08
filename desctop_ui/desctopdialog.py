@@ -2,16 +2,17 @@
 
 # Form implementation generated from reading ui file 'desctopdialog.ui'
 #
-# Created by: PyQt5 UI code generator 5.10
+# Created by: PyQt5 UI code generator 5.12.2
 #
 # WARNING! All changes made in this file will be lost!
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 
+
 class Ui_DesctopMainWindow(object):
     def setupUi(self, DesctopMainWindow):
         DesctopMainWindow.setObjectName("DesctopMainWindow")
-        DesctopMainWindow.resize(492, 403)
+        DesctopMainWindow.resize(492, 405)
         DesctopMainWindow.setStyleSheet("#L_debts{\n"
 "    color: rgb(255, 0, 0);\n"
 "}")
@@ -220,7 +221,7 @@ class Ui_DesctopMainWindow(object):
         self.label_5.setAlignment(QtCore.Qt.AlignCenter)
         self.label_5.setObjectName("label_5")
         self.gridLayout.addWidget(self.label_5, 0, 0, 1, 2)
-        spacerItem = QtWidgets.QSpacerItem(20, 20, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Maximum)
+        spacerItem = QtWidgets.QSpacerItem(20, 10, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Fixed)
         self.gridLayout.addItem(spacerItem, 1, 0, 1, 1)
         DesctopMainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QtWidgets.QMenuBar(DesctopMainWindow)
@@ -285,6 +286,8 @@ class Ui_DesctopMainWindow(object):
         self.actionCofigure_con.setShortcut(_translate("DesctopMainWindow", "Ctrl+D, Ctrl+B"))
 
 
+
+
 if __name__ == "__main__":
     import sys
     app = QtWidgets.QApplication(sys.argv)
@@ -293,4 +296,3 @@ if __name__ == "__main__":
     ui.setupUi(DesctopMainWindow)
     DesctopMainWindow.show()
     sys.exit(app.exec_())
-
