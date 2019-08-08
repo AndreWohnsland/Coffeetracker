@@ -16,15 +16,17 @@ from PyQt5.QtWidgets import *
 from PyQt5.uic import *
 
 from desctop_ui.desctopdialog import Ui_DesctopMainWindow
+from desctop_ui.configdialog import Ui_ConfigDialog
 
 
 class MainScreen(QMainWindow, Ui_DesctopMainWindow):
     """Creates the desctop application for the controlling in the desctop
     Currently uses most function out of the Pi programm, since the logic is similar.
     It is planned to connect via remote access to the DB and get all the data.
-    Needs a path to the DB.
+    Needs a path to the DB, quantname and quantcosts if wished
+    The dirpath is the absolute path where the main is running. Currently unused.
     """
-    def __init__(self, parent=None, db_path=None, quantname="Coffee", quantcosts=0.25):
+    def __init__(self, parent=None, db_path=None, quantname="Coffee", quantcosts=0.25, dirpath=''):
         """ Init function for the MainWindow Class. """
         super(MainScreen, self).__init__(parent)
         self.setupUi(self)
@@ -34,7 +36,8 @@ class MainScreen(QMainWindow, Ui_DesctopMainWindow):
             self.DB = sqlite3.connect(db_path)
             self.c = self.DB.cursor()
         config = configparser.ConfigParser()
-        config.read('desctop_ui/employeeconfig.ini')
+        self.employeeconfig_path = 'employeeconfig.ini'
+        config.read(self.employeeconfig_path)
         self.default_firstname = config['employee']['firstname']
         self.default_lastname = config['employee']['lastname']
         self.default_empid = int(config['employee']['empid'])
@@ -137,11 +140,11 @@ class MainScreen(QMainWindow, Ui_DesctopMainWindow):
     def set_config(self):
         """ Changes the default config settings to the selected user. """
         config = configparser.ConfigParser()
-        config.read('desctop_ui/employeeconfig.ini')
+        config.read(self.employeeconfig_path)
         config['employee']['firstname'] = f'{self.employee_first_name}'
         config['employee']['lastname'] = f'{self.employee_last_name}'
         config['employee']['empid'] = f'{self.employee_id}'
-        with open('desctop_ui/employeeconfig.ini', 'w') as configfile:
+        with open(self.employeeconfig_path, 'w') as configfile:
             config.write(configfile)
         self.default_firstname = self.employee_first_name
         self.default_lastname = self.employee_last_name
@@ -436,7 +439,8 @@ class MainScreen(QMainWindow, Ui_DesctopMainWindow):
         """ Generation for the Configuration. Guides the user through the configuration.
         Also gets called if the app starts the first time (the config.ini holds this information)
         """
-        print("Database configuration")
+        self.configurewindow = ConfigDialog(self)
+        self.configurewindow.show()
 
 class GraphWindow(QDialog):
     """
@@ -520,12 +524,69 @@ class GraphWindow(QDialog):
         """ Closes the window. """
         self.close()
 
+class ConfigDialog(QDialog, Ui_ConfigDialog):
+    """ """
+    def __init__(self, parent):
+        """ Init function for the Configdialog Class. """
+        super(ConfigDialog, self).__init__(parent)
+        self.setupUi(self)
+        self.ms = parent
+        self.employeeconfig_path = self.ms.employeeconfig_path
+        # get the config data and assign the values accordingly
+        self.location, self.db_type, self.pi_ip, self.pi_name, self.pi_password = get_config()
+        if self.location == 'pi':
+            self.RB_pi.setChecked(True)
+        if self.db_type == 'own':
+            self.RB_own.setChecked(True)
+        self.LE_ip.setText(self.pi_ip)
+        self.LE_name.setText(self.pi_name)
+        self.LE_password.setText(self.pi_password)
+
+        # connects the buttons
+        self.PB_change.clicked.connect(self.change_config)
+        self.PB_cancel.clicked.connect(lambda: self.close())
+
+    def change_config(self):
+        """ Evaluates the data and if everythin is okay enters it into the """
+        if self.RB_pi.isChecked() and (self.LE_ip.text()=="" or self.LE_name.text()=="" or self.LE_password.text()==""):
+            standartbox("At least one entry for the pi is missing", parent=self)
+        elif self.RB_pi.isChecked():
+            print("Check if the data is valid or not")
+        else:
+            config = configparser.ConfigParser()
+            user_path = self.employeeconfig_path
+            config.read(user_path)
+            if self.RB_pi.isChecked():
+                config['program']['db_location'] = 'pi'
+            else:
+                config['program']['db_location'] = 'local'
+            if self.RB_own.isChecked():
+                config['program']['db_type'] = 'own'
+            else:
+                config['program']['db_type'] = 'dummy'
+            with open(user_path, 'w') as configfile:
+                config.write(configfile)
+            standartbox("The config was changed ... closing the program ... please start again.", parent=self)
+            self.close()
+            self.ms.close()
+
 def standartbox(textstring, boxtype="standard", okstring="OK", cancelstring="Cancel", parent=None):
-    """ The default messagebox for the Maker. Uses a QMessageBox with OK-Button 
-    Boxtypes are:
-        standard: Only an ok button and a text
-        okcancel: Text with option to okay or cancel 
+    """The default messagebox for the Maker. Uses a QMessageBox with OK-Button 
+    
+    Args:
+        textstring (str): Display message for the box.
+        boxtype (str, optional): Type of the dialog. Use standard or okcancel. Defaults to "standard".
+        okstring (str, optional): Label of the ok-Button. Defaults to "OK".
+        cancelstring (str, optional): Label ob the cancel (or other) button. Defaults to "Cancel".
+        parent (qt_window, optional): Parent qt window from where the dialog should inherit the style/properties. Defaults to None.
+    
+    Returns:
+        int: Boxvalue, specific to the qt Framework, 1024 for ok clicked.
     """
+    # Boxtypes are:
+    #     standard: Only an ok button and a text
+    #     okcancel: Text with option to okay or cancel 
+    # 
     # print(textstring)
     msgBox = QMessageBox(parent)
     if boxtype == "standard":
@@ -550,12 +611,13 @@ def standartbox(textstring, boxtype="standard", okstring="OK", cancelstring="Can
         # print("value of pressed message box button:", retval)
         return retval
 
-def get_properties(src_path):
+def get_properties(src_path, optionalpath=None):
     """Reads the single properties for the quantities and the propramm out of the according .ini files.
     Later also a synchronisation from the machine properties is planned.
     
     Args:
         src_path (str): Path to the runme python file
+        optionalpath (str): Optional path to the Pi if the standart path is not found. Defaults to None.
     
     Returns:
         tuple: tuple of properties: Database path, threshold value, quantcosts, quantname, error during handling the process
@@ -563,17 +625,40 @@ def get_properties(src_path):
     # reads the user definited configs
     handling_error = False
     config_user = configparser.ConfigParser()
-    config_user.read(os.path.join(src_path, "desctop_ui", "employeeconfig.ini"))
-    # checks where the db is located, and if it is already a path to the db
-    if config_user['program']['db_location'] == 'local':
-        ret_db_path = os.path.join(src_path, "data", "employees_dummy.db")
-    elif config_user['program']['db_location'] == 'pi':
-        print("getting the db from the pi, trying to get connection, if it fails (Pi is down), shut down the programm/do some other actions")
-    with open(os.path.join(src_path, "desctop_ui", "employeeconfig.ini"), 'w') as configfile:
-        config_user.write(configfile)
     config_quant = configparser.ConfigParser()
-    config_quant.read(os.path.join(src_path, "desctop_ui", "quantconfig.ini"))
+    user_path = os.path.join(src_path, "employeeconfig.ini")
+    config_user.read(user_path)
+    # checks where the db is located, gets the path for db, also gets the path for the .ini for the quant (maybe also get this data into the db?)
+    master_location = config_user['program']['db_location']
+    database_type = config_user['program']['db_type']
+    if master_location == 'local':
+        if database_type == 'own':
+            ret_db_path = os.path.join(src_path, "data", "employees.db")
+        else:
+            ret_db_path = os.path.join(src_path, "data", "employees_dummy.db")
+        quant_path = os.path.join(src_path, "quantconfig.ini")
+    # if the db is remote on the pi, evaluates if the dummy db or the regular DB shall be used. (dummy is for demo use only)
+    # here os.path.isfile should be the key function to establish the connection check!
+    # also consult https://stackoverflow.com/questions/12932607/how-to-check-if-a-sqlite3-database-exists-in-python for further information
+    elif master_location == 'pi':
+        path_pi_data = 'home/pi/Coffeetracker/data'
+        print(path_pi_data)
+        print("getting the db from the pi, trying to get connection, if it fails (Pi is down), shut down the programm/do some other actions")
+        print("getting the .ini path from the Pi, same procedure as above.")
+    # connects to the ini with the quant data
+    config_quant.read(quant_path)
     threshold = float(config_quant['properties']['paymentcall_threshold'])
     quantcosts = float(config_quant['properties']['quantcosts'])
     quantname = str(config_quant['properties']['quantname']).replace('"','')
     return (ret_db_path, threshold, quantcosts, quantname, handling_error)
+
+def get_config():
+    config = configparser.ConfigParser()
+    user_path = "employeeconfig.ini"
+    config.read(user_path)
+    location = config['program']['db_location']
+    db_type = config['program']['db_type']
+    pi_ip = config['pi']['ip']
+    pi_name = config['pi']['name']
+    pi_password = config['pi']['password']
+    return (location, db_type, pi_ip, pi_name, pi_password)
