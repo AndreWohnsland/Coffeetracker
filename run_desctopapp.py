@@ -18,9 +18,9 @@ if __name__ == "__main__":
     if occured_error:
         go_on = False
         # searching for the db. logig needs to be implemented here:
-        standartbox("An Error connecting to the DB occured. Want to search manually for it?")
+        standartbox("An Error connecting to the DB occured. Please check that the Pi is in the same Network and the programm was installed correctly!")
         # if it was possible to resolve the problem go_on=True else dont update
-        go_on = True
+        # go_on = True
     if go_on:
         #creates the mainscreen, sets it to fixed size and fullscreen
         create_new_db(db_path)
