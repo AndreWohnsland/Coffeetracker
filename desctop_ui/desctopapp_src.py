@@ -3,6 +3,7 @@ import os
 import sqlite3
 import datetime
 import configparser
+import pysftp
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.colors as mcolors
@@ -39,7 +40,9 @@ class MainScreen(QMainWindow, Ui_DesctopMainWindow):
         self.default_firstname = config['employee']['firstname']
         self.default_lastname = config['employee']['lastname']
         self.default_empid = int(config['employee']['empid'])
-        
+        self.db_location, self.db_type, self.pi_ip, self.pi_name, self.pi_password = get_config()
+        self.pi_db_filepath, self.pi_quant_filepath, self.local_db_filepath, self.local_quant_filepath = generate_filepath(self.db_type)
+
         # Generates nececary variables
         self.employee_first_name = ""
         self.employee_last_name = ""
@@ -171,7 +174,9 @@ class MainScreen(QMainWindow, Ui_DesctopMainWindow):
                 enter_credit = True
         # finally enters the data into the db and deletes the entry LE/ updates the label
         if enter_credit:
+            self.infobox("~~ Updating data on pi ~~", "Downloading and uploading the data on the pi, please wait", self)
             self.queryDB("UPDATE OR IGNORE employees SET money = money + ? WHERE ID = ?",(pay_amount, self.employee_id))
+            self.msgBox.close()
             new_money = self.queryDB("SELECT money FROM employees WHERE ID = ?",(self.employee_id,)).fetchone()[0]
             self.LE_payment.setText("")
             standartbox("Your payment has been entered!", parent=self)
@@ -196,9 +201,11 @@ class MainScreen(QMainWindow, Ui_DesctopMainWindow):
             if exist_employee:
                 # also gets the time to insert into the tracking table, updates the label and checks if the user exceeded the critical amount of debts
                 time_now = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+                self.infobox("~~ Updating data on pi ~~", "Downloading and uploading the data on the pi, please wait", self)
                 self.queryDB("UPDATE OR IGNORE employees SET amount = amount + 1, money = money - ? WHERE ID = ?", (self.quantcosts, self.employee_id))
                 self.queryDB("INSERT OR IGNORE INTO tracks(employee_ID, time) VALUES(?, ?)", (self.employee_id, time_now))
                 money = self.queryDB("SELECT money FROM employees WHERE ID = ?",(self.employee_id,)).fetchone()[0]
+                self.msgBox.close()
                 self.update_money_shown(money)
             else:
                 # this should never happen
@@ -215,9 +222,11 @@ class MainScreen(QMainWindow, Ui_DesctopMainWindow):
         if user_return == 1024:
             current_money = self.queryDB("SELECT money FROM employees WHERE ID = ?",(self.employee_id,)).fetchone()[0]
             new_money = current_money + self.quantcosts
+            self.infobox("~~ Updating data on pi ~~", "Downloading and uploading the data on the pi, please wait", self)
             self.queryDB("UPDATE OR IGNORE employees SET money = ?, amount = amount - 1 WHERE ID = ?",(new_money, self.employee_id))
             # deletes the last entry of the employee in the tracking list
             self.queryDB("DELETE FROM tracks WHERE Number=(SELECT max(Number) FROM tracks WHERE employee_ID=?)",(self.employee_id,))
+            self.msgBox.close()
             # sets the label according to the credit
             self.update_money_shown(new_money)
 
@@ -250,19 +259,24 @@ class MainScreen(QMainWindow, Ui_DesctopMainWindow):
             # checks if already exists, else enter into the DB and updates the Comboboxes/sorts them
             name_exists = self.queryDB("SELECT COUNT(*) FROM employees WHERE first_name = ? AND last_name = ?",(first_name, last_name)).fetchone()[0]
             if not name_exists and not update:
+                self.infobox("~~ Updating data on pi ~~", "Downloading and uploading the data on the pi, please wait", self)
                 self.queryDB("INSERT OR IGNORE INTO employees(first_name, last_name, amount, money, enabled) VALUES(?,?,0,0,1)",(first_name, last_name))
+                self.msgBox.close()
                 first_name_object.clear()
                 last_name_object.clear()
                 standartbox(f"Employee {first_name} {last_name} was generated!", parent=self)
                 self.comboboxfill(mode='all', cb_object=self.CB_modify)
                 self.comboboxfill(mode='active', cb_object=self.CB_active)
+                self.set_default()
             elif update:
                 if checkbox_object.isChecked():
                     enabled = 1
                 else:
                     enabled = 0
                 emp_id = self.CB_modify.currentData()
+                self.infobox("~~ Updating data on pi ~~", "Downloading and uploading the data on the pi, please wait", self)
                 self.queryDB("UPDATE OR IGNORE employees SET first_name=?, last_name=?, enabled=? WHERE ID=?",(first_name, last_name, enabled, emp_id))
+                self.msgBox.close()
                 # clears an repopulates the CB // alternative here code to just replace or call to the function
                 self.comboboxfill(mode='all', cb_object=self.CB_modify)
                 self.comboboxfill(mode='active', cb_object=self.CB_active)
@@ -329,7 +343,8 @@ class MainScreen(QMainWindow, Ui_DesctopMainWindow):
         cb_object.clear()
         cb_object.addItem(self.emptystring, 0)
         # adds all selected employees, as well as their id to the CB
-        for employee in self.queryDB(sqlstring):
+        employeelist = self.queryDB(sqlstring).fetchall()
+        for employee in employeelist:
             cb_object.addItem(" ".join((employee[0], employee[1])), employee[2])
 
     def comboboxchange(self, mode='all', cb_object=None):
@@ -424,10 +439,30 @@ class MainScreen(QMainWindow, Ui_DesctopMainWindow):
         self.comboboxchange(mode='active', cb_object=self.CB_active)
 
     def get_database(self):
-        pass
+        """ Gets the path to the database. If its extern, copies it to the local file. """
+        # self.pi_db_filepath, self.pi_quant_filepath, self.local_db_filepath, self.local_quant_filepath
+        if self.db_location == 'pi':
+            try:
+                cnopts = pysftp.CnOpts()
+                cnopts.hostkeys = None
+                with pysftp.Connection(self.pi_ip, username=self.pi_name, password=self.pi_password, cnopts=cnopts) as sftp:
+                    sftp.get(self.pi_db_filepath, self.local_db_filepath)
+            except:
+                standartbox("Could not Connect to the Pi! Please check if the Pi is turned on and connected to the Network!")
+                self.close()
+        
 
     def put_database(self):
-        pass
+        """ Puts the modified DB back to the Pi. """
+        if self.db_location == 'pi':
+            try:
+                cnopts = pysftp.CnOpts()
+                cnopts.hostkeys = None
+                with pysftp.Connection(self.pi_ip, username=self.pi_name, password=self.pi_password, cnopts=cnopts) as sftp:
+                    sftp.put(self.local_db_filepath, self.pi_db_filepath)
+            except:
+                standartbox("Could not Connect to the Pi! Please check if the Pi is turned on and connected to the Network!")
+                self.close()
 
     def connDB(self):
         """Connect to the database and generates a cursor
@@ -445,6 +480,10 @@ class MainScreen(QMainWindow, Ui_DesctopMainWindow):
         Returns:
             cursor: Data (tuple or None) if a select statement was chosen
         """
+        if sql[0:6].lower() != 'select':
+            self.DB.close()
+            self.get_database()
+
         self.connDB()
         self.c.execute(sql, serachtuple)
 
@@ -453,7 +492,17 @@ class MainScreen(QMainWindow, Ui_DesctopMainWindow):
             return result
         else:
             self.DB.commit()
-        self.DB.close()
+            self.DB.close()
+            self.put_database()
+            
+    def infobox(self, title=None, text=None, parent=None):
+        self.msgBox = QMessageBox(parent)
+        self.msgBox.setWindowTitle(title)
+        self.msgBox.setIcon(QMessageBox.Information)
+        self.msgBox.setText(text)
+        self.msgBox.setWindowIcon(QIcon('desctop_ui/coffee.png'))
+        self.msgBox.show()
+        # retval = self.msgBox.exec_()
 
     def action_what(self):
         """ Short info message for the user what to do. """
@@ -583,8 +632,8 @@ class ConfigDialog(QDialog, Ui_ConfigDialog):
         # first checks if its the pi, that everythin is given
         if self.RB_pi.isChecked() and (self.LE_ip.text()=="" or self.LE_name.text()=="" or self.LE_password.text()==""):
             standartbox("At least one entry for the pi is missing", parent=self)
-        elif self.RB_pi.isChecked():
-            print("Check if the data is valid or not")
+        # elif self.RB_pi.isChecked():
+        #     print("Check if the data is valid or not")
         # if no errors, go on
         else:
             config = configparser.ConfigParser()
@@ -593,6 +642,9 @@ class ConfigDialog(QDialog, Ui_ConfigDialog):
             # checks if the pi or local and own or dummy data, saves the information
             if self.RB_pi.isChecked():
                 config['program']['db_location'] = 'pi'
+                config['pi']['ip'] = self.LE_ip.text()
+                config['pi']['name'] = self.LE_name.text()
+                config['pi']['password'] = self.LE_password.text()
             else:
                 config['program']['db_location'] = 'local'
             if self.RB_own.isChecked():
@@ -660,35 +712,32 @@ def get_properties(src_path, optionalpath=None):
     """
     # reads the user definited configs
     handling_error = False
-    config_user = configparser.ConfigParser()
     config_quant = configparser.ConfigParser()
-    user_path = os.path.join(src_path, "employeeconfig.ini")
-    config_user.read(user_path)
-    # checks where the db is located, gets the path for db, also gets the path for the .ini for the quant (maybe also get this data into the db?)
-    master_location = config_user['program']['db_location']
-    database_type = config_user['program']['db_type']
-    if master_location == 'local':
-        if database_type == 'own':
-            ret_db_path = os.path.join(src_path, "data", "employees.db")
-        else:
-            ret_db_path = os.path.join(src_path, "data", "employees_dummy.db")
-        quant_path = os.path.join(src_path, "quantconfig.ini")
-    # if the db is remote on the pi, evaluates if the dummy db or the regular DB shall be used. (dummy is for demo use only)
+    # gets all the properties out of the ini file
+    master_location, db_type, pi_ip, pi_name, pi_password = get_config()
+    # generates the name of the DB (dummy or not)
+    pi_db_filepath, pi_quant_filepath, local_db_filepath, local_quant_filepath = generate_filepath(db_type)
+
+    # if the db is remote on the pi, checks if the connection is possible, otherwise return an error.
     # here os.path.isfile should be the key function to establish the connection check!
     # also consult https://stackoverflow.com/questions/12932607/how-to-check-if-a-sqlite3-database-exists-in-python for further information
     # or https://www.guru99.com/python-check-if-file-exists.html
     # for me: this will probably not take place here, but mostly in the other method in the mainclass. get and put of the db b4 and after sql inserts
-    elif master_location == 'pi':
-        path_pi_data = 'home/pi/Coffeetracker/data'
-        print(path_pi_data)
-        print("getting the db from the pi, trying to get connection, if it fails (Pi is down), shut down the programm/do some other actions")
-        print("getting the .ini path from the Pi, same procedure as above.")
+    if master_location == 'pi':
+        try:
+            cnopts = pysftp.CnOpts()
+            cnopts.hostkeys = None
+            with pysftp.Connection(pi_ip, username=pi_name, password=pi_password, cnopts=cnopts) as sftp:
+                sftp.get(pi_db_filepath, local_db_filepath)
+                sftp.get(pi_quant_filepath, local_quant_filepath)
+        except:
+            return (None, None, None, None, True)
     # connects to the ini with the quant data
-    config_quant.read(quant_path)
+    config_quant.read(local_quant_filepath)
     threshold = float(config_quant['properties']['paymentcall_threshold'])
     quantcosts = float(config_quant['properties']['quantcosts'])
     quantname = str(config_quant['properties']['quantname']).replace('"','')
-    return (ret_db_path, threshold, quantcosts, quantname, handling_error)
+    return (local_db_filepath, threshold, quantcosts, quantname, handling_error)
 
 def get_config():
     config = configparser.ConfigParser()
@@ -700,3 +749,19 @@ def get_config():
     pi_name = config['pi']['name']
     pi_password = config['pi']['password']
     return (location, db_type, pi_ip, pi_name, pi_password)
+
+
+def generate_filepath(db_type):
+    """ Generates all the paths to the pi and to the pc for db and ini files."""
+    # generates the name of the DB (dummy or not)
+    suffix_db = ""
+    if db_type == 'dummy':
+        suffix_db = "_dummy"
+    db_filename = f"employees{suffix_db}.db"
+    # generates the path to the properties and the db (local or pi)
+    # generates the path to the pi and to the local file
+    pi_db_filepath = f"/home/pi/Coffeetracker/data/{db_filename}"
+    pi_quant_filepath = "/home/pi/Coffeetracker/quantconfig.ini"
+    local_db_filepath = f"data/{db_filename}"
+    local_quant_filepath = "quantconfig.ini" 
+    return (pi_db_filepath, pi_quant_filepath, local_db_filepath, local_quant_filepath)
