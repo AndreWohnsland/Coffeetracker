@@ -699,13 +699,13 @@ def standartbox(textstring, boxtype="standard", okstring="OK", cancelstring="Can
         # print("value of pressed message box button:", retval)
         return retval
 
-def get_properties(src_path, optionalpath=None):
+def get_properties(src_path, path_not_found=False):
     """Reads the single properties for the quantities and the propramm out of the according .ini files.
     Later also a synchronisation from the machine properties is planned.
     
     Args:
         src_path (str): Path to the runme python file
-        optionalpath (str): Optional path to the Pi if the standart path is not found. Defaults to None.
+        path_not_found (Bool): Rerun this method with true if the db on pi was not found to get local values instead. Defaults to False.
     
     Returns:
         tuple: tuple of properties: Database path, threshold value, quantcosts, quantname, error during handling the process
@@ -717,6 +717,9 @@ def get_properties(src_path, optionalpath=None):
     master_location, db_type, pi_ip, pi_name, pi_password = get_config()
     # generates the name of the DB (dummy or not)
     pi_db_filepath, pi_quant_filepath, local_db_filepath, local_quant_filepath = generate_filepath(db_type)
+
+    if path_not_found:
+        master_location = 'local'
 
     # if the db is remote on the pi, checks if the connection is possible, otherwise return an error.
     # here os.path.isfile should be the key function to establish the connection check!

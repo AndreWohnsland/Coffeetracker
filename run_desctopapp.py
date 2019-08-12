@@ -18,9 +18,13 @@ if __name__ == "__main__":
     if occured_error:
         go_on = False
         # searching for the db. logig needs to be implemented here:
-        standartbox("An Error connecting to the DB occured. Please check that the Pi is in the same Network and the programm was installed correctly!")
-        # if it was possible to resolve the problem go_on=True else dont update
-        # go_on = True
+        user_return = standartbox(
+            "An Error connecting to the DB occured. Please check that the Pi is in the same Network and the programm was installed correctly! Want to switch to local mode? Else closing ...",
+            boxtype="okcancel", okstring='local', cancelstring='quit')
+        # switching to local mode instead.
+        if user_return == 1024:
+            db_path, paymentcall_threshold, quantcosts, quantname, occured_error = get_properties(dirpath, path_not_found=True)
+            go_on = True
     if go_on:
         #creates the mainscreen, sets it to fixed size and fullscreen
         create_new_db(db_path)
