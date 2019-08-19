@@ -61,6 +61,7 @@ devenvironment = True
 ```
 
 ## Setting up the Program Parameters
+
 There are some options before the first start you can set. For usual testing i recommend setting `devenvironment` to `True` for programming and adjustments, otherwise set it to false. The `app_width` and `app_height` parameters refer to your touchscreen resolution. In this case its a 3.5" Screen. As a DB name, you can choose whatever name you find fitting or prefer.\
 For the quantities there are basically three options: First, you can set a price on the quantity, if it costs nothing you can set it to zero. Then you can name the quantity, in our case it's coffee. And lastly, you can set a threshold, at which a call to payment label is shown when the according user is selected. Furthermore, if the threshold is exceeded by factor 1.5 (feel free to change it in you code) the user will also get a messagebox reminding him to pay (we could even go further with emailing or stuff like that, if we implement the email address into our DB).
 ```python
@@ -72,3 +73,22 @@ paymentcall_threshold = 10      # When the pay message got displayed (critical i
 quantcosts = 0.25               # cost of one quant (can also be 0)
 quantname = "coffee"            # name of your quants 
 ```
+
+## Optional: Connect your PC with the Raspberry Pi App
+
+In addition to the RPi App, there is a second App for the use on a Windows (or other) engine. The file `run_desctopapp.py` will start that program. It got the same features as the program for the Pi. 
+
+![alt text](https://github.com/AndreWohnsland/Coffeetracker/blob/master/pictures/desctopapp.PNG "Application")
+
+There are different methods to use that application. Via `Config` the connection type can be set. It is `local` and `Demo Database` by default for demonstration purposes. If you want to set up your own Database you can switch to this option. The program will then use the `employees.db` file instead of `employees_dummy.db`. Usually the data and logging happens on the Pi, and only optional via the pc app. Therefore the database is located on the Pi, the PC app will get it via sftp. To enable communication via the PC and the Pi, you need to set up a secure shell (SSC) on the Pi. This option is disabled by default on the Pi, also it is recommended not to use the default Pi password for this process but use an own secure one. The Pi and the PC needs to be in the same Network for this. You can read some further information on this process under the official documentation for [SSH](https://www.raspberrypi.org/documentation/remote-access/ssh/) as well as for [SFTP](https://www.raspberrypi.org/documentation/remote-access/ssh/sftp.md). To get your ip, connect the Pi with the Internet and use the `ifconfig` command on the Pi command line. Name and Password are defined by the user, please do not use default ones (at least for the password).
+
+Since this app was developed after the Pi app was finished, this process uses a sqlite DB, which is not optional in terms of speed/performance. In the future it is planned to use another DB (for example PostgreSql).
+
+
+
+
+
+
+
+
+
